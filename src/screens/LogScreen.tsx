@@ -51,7 +51,7 @@ import {
 } from '../utils/storage';
 import {
   DayWorkout, WorkoutSet, RunEntry, Exercise, GratitudeEntry,
-  Habit, HabitEntry, HabitRewardGoal, HabitType, HabitCheckpoint, HabitCompletion, HabitFrequency, WeightUnit, WeightEntry, Todo,
+  Habit, HabitEntry, HabitRewardGoal, HabitType, HabitCheckpoint, HabitCompletion, HabitFrequency, WeightUnit, WeightEntry, Todo, RecurrenceRule,
 } from '../types';
 
 const today = getTodayString();
@@ -181,6 +181,7 @@ export default function LogScreen() {
   const dragOverHabitId = useRef<string | null>(null);
   const [habitReward, setHabitReward] = useState<HabitRewardGoal | null>(null);
   const [meditatingHabitId, setMeditatingHabitId] = useState<string | null>(null);
+  const [createTaskHabit, setCreateTaskHabit] = useState<Habit | null>(null);
 
   // Weight
   const [weightUnit, setWeightUnit] = useState<WeightUnit>('kg');
@@ -544,15 +545,16 @@ export default function LogScreen() {
     await persistDeleteHabit(habitId);
   }
 
-  async function handleCreateTaskFromHabit(habit: Habit) {
-    const title = habit.nextAction?.trim() || (habit.name ?? habit.action ?? 'Task');
+  async function handleCreateTaskFromHabit(habit: Habit, title: string, recurrence?: RecurrenceRule) {
     const todo: Todo = {
       id: crypto.randomUUID(),
-      title,
+      title: title.trim(),
       done: false,
       myDay: true,
       dueDate: today,
       sourceHabitId: habit.id,
+      recurrence,
+      recurringGroupId: recurrence ? crypto.randomUUID() : undefined,
       createdAt: Date.now(),
       order: Date.now(),
     };
@@ -1024,7 +1026,7 @@ export default function LogScreen() {
                       onDelete={() => handleDeleteHabit(habit.id)}
                       onEdit={() => setEditingHabit(habit)}
                       onMeditate={habit.isMeditation ? () => setMeditatingHabitId(habit.id) : undefined}
-                      onCreateTask={() => handleCreateTaskFromHabit(habit)}
+                      onCreateTask={() => setCreateTaskHabit(habit)}
                     />
                   )}
                 </div>
@@ -1350,6 +1352,18 @@ export default function LogScreen() {
         <MeditationOverlay
           onComplete={() => handleSetCompletion(meditatingHabitId, 'full')}
           onClose={() => setMeditatingHabitId(null)}
+        />
+      )}
+
+      {/* Create Task from Habit Modal */}
+      {createTaskHabit && (
+        <CreateTaskFromHabitModal
+          habit={createTaskHabit}
+          onClose={() => setCreateTaskHabit(null)}
+          onSave={(title, recurrence) => {
+            handleCreateTaskFromHabit(createTaskHabit, title, recurrence);
+            setCreateTaskHabit(null);
+          }}
         />
       )}
     </div>
@@ -2241,6 +2255,105 @@ function HabitModal({
             <Trash2 size={14} /> Delete habit
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Create Task From Habit Modal ─────────────────────────────────────────────
+
+function CreateTaskFromHabitModal({
+  habit, onClose, onSave,
+}: {
+  habit: Habit;
+  onClose: () => void;
+  onSave: (title: string, recurrence?: RecurrenceRule) => void;
+}) {
+  const defaultTitle = habit.nextAction?.trim() || (habit.name ?? habit.action ?? 'Task');
+  const [title, setTitle] = useState(defaultTitle);
+  const [recurrenceType, setRecurrenceType] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
+  const [daysOfWeek, setDaysOfWeek] = useState<number[]>([]);
+  const [dayOfMonth, setDayOfMonth] = useState(1);
+
+  function toggleDay(d: number) {
+    setDaysOfWeek(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d]);
+  }
+
+  function handleSubmit() {
+    if (!title.trim()) return;
+    let recurrence: RecurrenceRule | undefined;
+    if (recurrenceType === 'daily') recurrence = { type: 'daily' };
+    else if (recurrenceType === 'weekly') recurrence = { type: 'weekly', daysOfWeek: daysOfWeek.length ? daysOfWeek : [new Date().getDay()] };
+    else if (recurrenceType === 'monthly') recurrence = { type: 'monthly', dayOfMonth };
+    onSave(title, recurrence);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="w-full max-w-lg bg-white dark:bg-[#111827] rounded-t-3xl p-6 space-y-5 pb-10"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">Create Task</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"><X size={20} /></button>
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Task Title</label>
+          <input
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            autoFocus
+            className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Repeat</label>
+          <div className="flex gap-2 flex-wrap">
+            {(['none', 'daily', 'weekly', 'monthly'] as const).map(t => (
+              <button
+                key={t}
+                onClick={() => setRecurrenceType(t)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${recurrenceType === t ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-600 dark:text-slate-300'}`}
+              >
+                {t === 'none' ? 'One-time' : t.charAt(0).toUpperCase() + t.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {recurrenceType === 'weekly' && (
+            <div className="flex gap-2 mt-3">
+              {DAY_LABELS.map((label, i) => (
+                <button
+                  key={i}
+                  onClick={() => toggleDay(i)}
+                  className={`w-9 h-9 rounded-full text-sm font-semibold transition-colors ${daysOfWeek.includes(i) ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-600 dark:text-slate-300'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {recurrenceType === 'monthly' && (
+            <div className="mt-3 flex items-center gap-3">
+              <span className="text-sm text-slate-500 dark:text-slate-400">Day of month</span>
+              <button className="stepper-btn" onClick={() => setDayOfMonth(d => Math.max(1, d - 1))}>−</button>
+              <span className="text-slate-900 dark:text-white font-bold text-lg w-8 text-center">{dayOfMonth}</span>
+              <button className="stepper-btn" onClick={() => setDayOfMonth(d => Math.min(28, d + 1))}>+</button>
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={handleSubmit}
+          disabled={!title.trim()}
+          className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-bold rounded-xl transition-colors"
+        >
+          Add Task
+        </button>
       </div>
     </div>
   );

@@ -12,12 +12,11 @@ import { getAllTodos, getTodayString } from '../utils/storage';
 // ─── Tab order persistence ────────────────────────────────────────────────────
 
 const DEFAULT_TABS = [
-  { id: '/today', label: 'Today' },
+  { id: '/today', label: 'Home' },
   { id: '/', label: 'Log' },
   { id: '/progress', label: 'Progress' },
-  { id: '/tasks', label: 'Tasks' },
 ];
-const NAV_ORDER_KEY = 'bottomNavOrder_v2';
+const NAV_ORDER_KEY = 'bottomNavOrder_v4';
 
 function loadTabOrder() {
   try {
@@ -109,7 +108,7 @@ export default function BottomNav() {
                 key={tab.id}
                 tab={tab}
                 active={location.pathname === tab.id}
-                hasDot={tab.id === '/tasks' && pendingToday > 0}
+                hasDot={tab.id === '/today' && pendingToday > 0}
               />
             ))}
           </SortableContext>

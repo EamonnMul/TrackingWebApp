@@ -157,6 +157,14 @@ export interface Todo {
   createdAt: number;
   order: number;
   sourceHabitId?: string;     // set when created from a habit
+  recurrence?: RecurrenceRule;
+  recurringGroupId?: string;  // shared id across all instances of a recurring task
+}
+
+export interface RecurrenceRule {
+  type: 'daily' | 'weekly' | 'monthly';
+  daysOfWeek?: number[]; // 0=Sun…6=Sat, used when type='weekly'
+  dayOfMonth?: number;   // 1–28, used when type='monthly'
 }
 
 export interface FutureMeMessage {

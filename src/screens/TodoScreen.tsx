@@ -1,7 +1,36 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Flag, Calendar, ChevronDown, Sun } from 'lucide-react';
+import { Plus, Trash2, Flag, Calendar, ChevronDown, Sun, Repeat2 } from 'lucide-react';
 import { getAllTodos, saveTodo, deleteTodo, getTodayString, formatDate, getAllHabits, saveHabit } from '../utils/storage';
-import { Todo, Habit } from '../types';
+import { Todo, Habit, RecurrenceRule } from '../types';
+
+// ─── Recurrence helpers ───────────────────────────────────────────────────────
+
+function nextOccurrence(rule: RecurrenceRule, fromDate: string): string {
+  const d = new Date(fromDate + 'T12:00:00');
+  if (rule.type === 'daily') {
+    d.setDate(d.getDate() + 1);
+  } else if (rule.type === 'weekly') {
+    const days = rule.daysOfWeek ?? [];
+    if (days.length === 0) {
+      d.setDate(d.getDate() + 7);
+    } else {
+      const current = d.getDay();
+      const sorted = [...days].sort((a, b) => a - b);
+      const next = sorted.find(day => day > current) ?? sorted[0];
+      const diff = next > current ? next - current : 7 - current + next;
+      d.setDate(d.getDate() + diff);
+    }
+  } else if (rule.type === 'monthly') {
+    const day = rule.dayOfMonth ?? d.getDate();
+    d.setDate(1);
+    d.setMonth(d.getMonth() + 1);
+    const maxDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    d.setDate(Math.min(day, maxDay));
+  }
+  return d.toISOString().split('T')[0];
+}
+
+const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 type TodoView = 'myDay' | 'all';
 
@@ -80,14 +109,36 @@ export default function TodoScreen() {
   }
 
   async function handleToggle(id: string) {
-    const updated = todos.map(t => {
-      if (t.id !== id) return t;
-      const nowDone = !t.done;
-      return { ...t, done: nowDone, completedDate: nowDone ? today : undefined };
-    });
+    const original = todos.find(t => t.id === id)!;
+    const nowDone = !original.done;
+    const updated = todos.map(t =>
+      t.id === id ? { ...t, done: nowDone, completedDate: nowDone ? today : undefined } : t
+    );
     setTodos(updated);
     const todo = updated.find(t => t.id === id)!;
     await saveTodo(todo);
+
+    // Auto-create next occurrence for recurring tasks
+    if (nowDone && original.recurrence) {
+      const base = original.dueDate ?? today;
+      const nextDate = nextOccurrence(original.recurrence, base);
+      const next: Todo = {
+        id: crypto.randomUUID(),
+        title: original.title,
+        done: false,
+        dueDate: nextDate,
+        myDay: false,
+        priority: original.priority,
+        notes: original.notes,
+        sourceHabitId: original.sourceHabitId,
+        recurrence: original.recurrence,
+        recurringGroupId: original.recurringGroupId ?? original.id,
+        createdAt: Date.now(),
+        order: Date.now(),
+      };
+      await saveTodo(next);
+      setTodos(prev => [...prev, next]);
+    }
   }
 
   async function handleDelete(id: string) {
@@ -431,6 +482,11 @@ function TodoItem({
               {todo.myDay && !todo.dueDate && (
                 <span className="text-xs text-slate-600">My Day</span>
               )}
+              {todo.recurrence && (
+                <span className="text-[10px] text-blue-400 flex items-center gap-0.5">
+                  <Repeat2 size={9} /> {todo.recurrence.type}
+                </span>
+              )}
             </div>
           </button>
         )}
@@ -487,6 +543,71 @@ function TodoItem({
               className={`w-10 h-5 rounded-full transition-colors relative flex-shrink-0 ${todo.myDay ? 'bg-blue-600' : 'bg-slate-700'}`}>
               <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${todo.myDay ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </button>
+          </div>
+
+          {/* Recurrence */}
+          <div>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
+              <Repeat2 size={11} /> Repeat
+            </label>
+            <select
+              value={todo.recurrence?.type ?? ''}
+              onChange={e => {
+                const type = e.target.value as RecurrenceRule['type'] | '';
+                if (!type) {
+                  onUpdate({ recurrence: undefined, recurringGroupId: undefined });
+                } else {
+                  const defaultDays = todo.dueDate
+                    ? [new Date(todo.dueDate + 'T12:00:00').getDay()]
+                    : [new Date().getDay()];
+                  onUpdate({
+                    recurrence: {
+                      type,
+                      ...(type === 'weekly' ? { daysOfWeek: defaultDays } : {}),
+                      ...(type === 'monthly' ? { dayOfMonth: todo.dueDate ? new Date(todo.dueDate + 'T12:00:00').getDate() : new Date().getDate() } : {}),
+                    },
+                    recurringGroupId: todo.recurringGroupId ?? todo.id,
+                  });
+                }
+              }}
+              className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">Does not repeat</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+
+            {todo.recurrence?.type === 'weekly' && (
+              <div className="flex gap-1 mt-2">
+                {DAY_LABELS.map((d, i) => (
+                  <button key={i}
+                    onClick={() => {
+                      const days = todo.recurrence?.daysOfWeek ?? [];
+                      const next = days.includes(i) ? days.filter(x => x !== i) : [...days, i];
+                      if (next.length > 0) onUpdate({ recurrence: { ...todo.recurrence!, daysOfWeek: next } });
+                    }}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                      (todo.recurrence?.daysOfWeek ?? []).includes(i)
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 dark:bg-[#1C2537] text-slate-400'
+                    }`}
+                  >{d}</button>
+                ))}
+              </div>
+            )}
+
+            {todo.recurrence?.type === 'monthly' && (
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-xs text-slate-400">Day</span>
+                <input type="number" min={1} max={28}
+                  value={todo.recurrence.dayOfMonth ?? 1}
+                  onChange={e => onUpdate({ recurrence: { ...todo.recurrence!, dayOfMonth: Math.min(28, Math.max(1, +e.target.value)) } })}
+                  className="w-14 bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                <span className="text-xs text-slate-400">of each month</span>
+              </div>
+            )}
           </div>
 
           {/* From habit badge */}
