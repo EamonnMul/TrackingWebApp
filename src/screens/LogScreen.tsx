@@ -707,7 +707,7 @@ export default function LogScreen() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-cobalt-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -730,10 +730,11 @@ export default function LogScreen() {
     <div className="space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Log</h1>
-        <div className="flex items-center gap-2 mt-1">
+        <p className="screen-eyebrow text-cobalt-500">Big Dawg · Today's Grind</p>
+        <h1 className="screen-title">Log</h1>
+        <div className="flex items-center gap-2 mt-2">
           {/* Date pill — transparent date input overlaid so one tap opens native picker */}
-          <div className={`relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium cursor-pointer transition-colors ${logDate !== today ? 'bg-blue-500/15 text-blue-500' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-500 dark:text-slate-400'}`}>
+          <div className={`relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium cursor-pointer transition-colors ${logDate !== today ? 'bg-cobalt-500/15 text-cobalt-500' : 'bg-slate-100 dark:bg-ink-elevated text-slate-500 dark:text-slate-400'}`}>
             <Calendar size={14} />
             <span>{logDate === today ? 'Today' : formatDate(logDate)}</span>
             <input
@@ -743,7 +744,7 @@ export default function LogScreen() {
             />
           </div>
           {logDate !== today && (
-            <button onClick={() => setLogDate(today)} className="text-xs text-slate-400 hover:text-blue-500 transition-colors">back to today</button>
+            <button onClick={() => setLogDate(today)} className="text-xs text-slate-400 hover:text-cobalt-500 transition-colors">back to today</button>
           )}
         </div>
       </div>
@@ -765,25 +766,25 @@ export default function LogScreen() {
         <>
           {/* Target Card */}
           {tracksTarget && (
-            <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+            <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
               <div className="flex items-center gap-3">
                 <Flame size={18} className={targetMet ? 'text-green-400' : 'text-orange-400'} />
-                <div className="flex-1 h-2 bg-slate-100 dark:bg-[#1C2537] rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-slate-100 dark:bg-ink-elevated rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${targetMet ? 'bg-green-500' : 'bg-blue-500'}`}
+                    className={`h-full rounded-full transition-all duration-500 ${targetMet ? 'bg-green-500' : 'bg-cobalt-500'}`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span className={`text-sm font-bold w-9 text-right ${targetMet ? 'text-green-400' : 'text-blue-400'}`}>{pct}%</span>
+                <span className={`text-sm font-bold w-9 text-right ${targetMet ? 'text-green-400' : 'text-cobalt-400'}`}>{pct}%</span>
                 <button onClick={() => setShowTargetEdit(t => !t)} className="text-slate-400 hover:text-slate-600 dark:text-slate-600 dark:hover:text-slate-400 transition-colors ml-1">
                   <SlidersHorizontal size={15} />
                 </button>
               </div>
               {showTargetEdit && (
-                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-[#1E2D45]">
-                  <button onClick={() => adjustTarget(-5)} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#1C2537] text-slate-700 dark:text-slate-300 text-lg hover:bg-slate-200 dark:hover:bg-[#253347] transition-colors">−</button>
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-line">
+                  <button onClick={() => adjustTarget(-5)} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-ink-elevated text-slate-700 dark:text-slate-300 text-lg hover:bg-slate-200 dark:hover:bg-ink-elevated transition-colors">−</button>
                   <span className="text-slate-600 dark:text-slate-300 text-sm flex-1 text-center">{effectiveTarget} reps target</span>
-                  <button onClick={() => adjustTarget(5)} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#1C2537] text-slate-700 dark:text-slate-300 text-lg hover:bg-slate-200 dark:hover:bg-[#253347] transition-colors">+</button>
+                  <button onClick={() => adjustTarget(5)} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-ink-elevated text-slate-700 dark:text-slate-300 text-lg hover:bg-slate-200 dark:hover:bg-ink-elevated transition-colors">+</button>
                 </div>
               )}
               {targetMet && <p className="text-green-400 text-xs font-semibold mt-2">Target smashed. Big dawg energy.</p>}
@@ -791,22 +792,22 @@ export default function LogScreen() {
           )}
 
           {/* Exercise Selector */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-3">Exercise</span>
             <button
               onClick={() => { setShowExerciseDropdown(d => !d); setShowAddExercise(false); setNewExerciseName(''); }}
-              className="w-full flex items-center justify-between bg-slate-100 dark:bg-[#1C2537] hover:bg-slate-200 dark:hover:bg-[#253347] rounded-xl px-4 py-3 transition-colors"
+              className="w-full flex items-center justify-between bg-slate-100 dark:bg-ink-elevated hover:bg-slate-200 dark:hover:bg-ink-elevated rounded-xl px-4 py-3 transition-colors"
             >
               <span className="text-slate-900 dark:text-white font-semibold text-sm">{selectedExercise.name}</span>
               <ChevronDown size={16} className={`text-slate-400 transition-transform duration-200 ${showExerciseDropdown ? 'rotate-180' : ''}`} />
             </button>
 
             {showExerciseDropdown && (
-              <div className="mt-2 bg-slate-100 dark:bg-[#1C2537] rounded-xl overflow-hidden">
+              <div className="mt-2 bg-slate-100 dark:bg-ink-elevated rounded-xl overflow-hidden">
                 {exercises.map(ex => (
                   <div key={ex.id} className="flex items-center border-b border-slate-200 dark:border-[#253347] last:border-0">
-                    <button onClick={() => handleSelectExercise(ex.id)} className="flex-1 flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-200 dark:hover:bg-[#253347] transition-colors">
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${ex.id === selectedExerciseId ? 'border-blue-500 bg-blue-500' : 'border-slate-400 dark:border-slate-600'}`}>
+                    <button onClick={() => handleSelectExercise(ex.id)} className="flex-1 flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-200 dark:hover:bg-ink-elevated transition-colors">
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${ex.id === selectedExerciseId ? 'border-cobalt-500 bg-cobalt-500' : 'border-slate-400 dark:border-slate-600'}`}>
                         {ex.id === selectedExerciseId && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                       </div>
                       <span className={`text-sm ${ex.id === selectedExerciseId ? 'text-slate-900 dark:text-white font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>{ex.name}</span>
@@ -820,7 +821,7 @@ export default function LogScreen() {
                 ))}
                 <div className="border-t border-slate-200 dark:border-[#253347]">
                   {!showAddExercise ? (
-                    <button onClick={() => { setShowAddExercise(true); setTimeout(() => addExerciseInputRef.current?.focus(), 50); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-blue-500 hover:bg-slate-200 dark:hover:bg-[#253347] transition-colors">
+                    <button onClick={() => { setShowAddExercise(true); setTimeout(() => addExerciseInputRef.current?.focus(), 50); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-cobalt-500 hover:bg-slate-200 dark:hover:bg-ink-elevated transition-colors">
                       <Plus size={15} /> Add exercise
                     </button>
                   ) : (
@@ -828,9 +829,9 @@ export default function LogScreen() {
                       <input ref={addExerciseInputRef} value={newExerciseName} onChange={e => setNewExerciseName(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') handleAddExercise(); if (e.key === 'Escape') { setShowAddExercise(false); setNewExerciseName(''); } }}
                         placeholder="Exercise name"
-                        className="flex-1 bg-white dark:bg-[#0A0F1E] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600 border border-slate-200 dark:border-transparent"
+                        className="flex-1 bg-white dark:bg-ink text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600 border border-slate-200 dark:border-transparent"
                       />
-                      <button onClick={handleAddExercise} className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-colors">Add</button>
+                      <button onClick={handleAddExercise} className="px-3 py-2 bg-cobalt-500 hover:bg-cobalt-600 text-white text-sm font-semibold rounded-xl transition-colors">Add</button>
                     </div>
                   )}
                 </div>
@@ -838,10 +839,10 @@ export default function LogScreen() {
             )}
 
             {selectedExercise.id !== DEFAULT_EXERCISE_ID && (
-              <div className="mt-3 pt-3 border-t border-slate-100 dark:border-[#1E2D45] space-y-2">
+              <div className="mt-3 pt-3 border-t border-slate-100 dark:border-line space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500 text-xs">Track daily target</span>
-                  <button onClick={handleToggleTarget} className={`w-10 h-5 rounded-full transition-colors relative flex-shrink-0 ${selectedExercise.trackTarget ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                  <button onClick={handleToggleTarget} className={`w-10 h-5 rounded-full transition-colors relative flex-shrink-0 ${selectedExercise.trackTarget ? 'bg-cobalt-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
                     <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${selectedExercise.trackTarget ? 'translate-x-5' : 'translate-x-0.5'}`} />
                   </button>
                 </div>
@@ -863,7 +864,7 @@ export default function LogScreen() {
               { label: 'Top Weight', value: todayWorkout ? `${getMaxWeight(todayWorkout)} kg` : '—' },
               { label: 'Total Reps', value: totalReps },
             ].map(stat => (
-              <div key={stat.label} className="bg-white dark:bg-[#111827] rounded-2xl p-3 text-center shadow-sm border border-slate-200 dark:border-transparent">
+              <div key={stat.label} className="bg-white dark:bg-ink-surface rounded-2xl p-3 text-center shadow-sm border border-slate-200 dark:border-transparent">
                 <div className="text-xl font-extrabold text-slate-900 dark:text-white">{stat.value}</div>
                 <div className="text-xs text-slate-400 mt-0.5">{stat.label}</div>
               </div>
@@ -872,7 +873,7 @@ export default function LogScreen() {
 
           {/* Today's Sets */}
           {sets.length > 0 && (
-            <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+            <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
               <button
                 onClick={() => setShowSets(s => !s)}
                 className="w-full flex items-center justify-between px-4 pt-3 pb-3"
@@ -900,13 +901,13 @@ export default function LogScreen() {
                 }
                 return groups.map(g =>
                   g.kind === 'single' ? (
-                    <div key={g.set.id} className={`flex items-center px-4 py-3 border-t border-slate-100 dark:border-[#1E2D45] ${newItemId === g.set.id ? 'animate-pop-in' : ''}`}>
+                    <div key={g.set.id} className={`flex items-center px-4 py-3 border-t border-slate-100 dark:border-line ${newItemId === g.set.id ? 'animate-pop-in' : ''}`}>
                       <span className="text-xs text-slate-400 font-semibold uppercase tracking-wide w-12">Set {g.n}</span>
                       <span className="flex-1 text-slate-900 dark:text-white font-bold text-lg">{g.set.weight} kg × {g.set.reps}</span>
                       <button onClick={() => handleDeleteSet(g.set.id)} className="text-slate-400 dark:text-slate-600 hover:text-red-400 transition-colors p-1"><Trash2 size={16} /></button>
                     </div>
                   ) : (
-                    <div key={g.gid} className={`border-t border-slate-100 dark:border-[#1E2D45] ${g.items.some(it => newItemId === it.set.id) ? 'animate-pop-in' : ''}`}>
+                    <div key={g.gid} className={`border-t border-slate-100 dark:border-line ${g.items.some(it => newItemId === it.set.id) ? 'animate-pop-in' : ''}`}>
                       <div className="flex items-center gap-2 px-4 pt-2 pb-0.5">
                         <span className="text-xs font-bold text-violet-500 uppercase tracking-wider">Superset</span>
                         <div className="flex-1 h-px bg-violet-200 dark:bg-violet-900/40" />
@@ -926,7 +927,7 @@ export default function LogScreen() {
           )}
 
           {/* Add Set */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 space-y-4 shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 space-y-4 shadow-sm border border-slate-200 dark:border-transparent">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add Set</span>
             <div>
               <label className="text-slate-400 text-xs mb-2 block">Weight (kg)</label>
@@ -938,7 +939,7 @@ export default function LogScreen() {
               <div className="flex gap-2 mt-2 justify-center">
                 {[-5, -2.5, 2.5, 5].map(d => (
                   <button key={d} onClick={() => setWeight(w => Math.max(0, +(w + d).toFixed(1)))}
-                    className="text-xs text-blue-500 bg-slate-100 dark:bg-[#1C2537] px-3 py-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-[#253347] transition-colors font-semibold">
+                    className="text-xs text-cobalt-500 bg-slate-100 dark:bg-ink-elevated px-3 py-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-ink-elevated transition-colors font-semibold">
                     {d > 0 ? `+${d}` : d}
                   </button>
                 ))}
@@ -962,7 +963,7 @@ export default function LogScreen() {
                 <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${supersetGroupId ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </button>
             </div>
-            <button onClick={() => handleLogSet()} className={`w-full py-3.5 active:scale-[0.98] text-white font-bold rounded-xl transition-all ${supersetGroupId ? 'bg-violet-600 hover:bg-violet-500' : 'bg-blue-600 hover:bg-blue-500'} ${btnFlash === 'logSet' ? 'animate-btn-success' : ''}`}>
+            <button onClick={() => handleLogSet()} className={`w-full py-3.5 active:scale-[0.98] text-white font-bold rounded-xl transition-all ${supersetGroupId ? 'bg-violet-600 hover:bg-violet-500' : 'bg-cobalt-500 hover:bg-cobalt-600'} ${btnFlash === 'logSet' ? 'animate-btn-success' : ''}`}>
               Log Set
             </button>
           </div>
@@ -978,7 +979,7 @@ export default function LogScreen() {
               <button onClick={() => setShowManageHabits(m => !m)} className="text-slate-400 text-xs hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
                 {showManageHabits ? 'Done' : 'Manage'}
               </button>
-              <button onClick={() => setShowAddHabit(true)} className="text-blue-500 text-xs font-semibold flex items-center gap-1 hover:text-blue-400 transition-colors">
+              <button onClick={() => setShowAddHabit(true)} className="text-cobalt-500 text-xs font-semibold flex items-center gap-1 hover:text-cobalt-400 transition-colors">
                 <Plus size={12} /> Add
               </button>
             </div>
@@ -1111,7 +1112,7 @@ export default function LogScreen() {
       {logTab === 'running' && (
         <>
           {/* Weekly Volume */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">This Week</span>
               <span className="text-xs text-slate-400">Mon – today</span>
@@ -1123,21 +1124,21 @@ export default function LogScreen() {
           </div>
 
           {/* Log Run */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 space-y-3 shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 space-y-3 shadow-sm border border-slate-200 dark:border-transparent">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Log Run</span>
             <div className="flex items-center gap-3">
               <button className="stepper-btn" onClick={() => setRunDist(d => Math.max(0.5, +(d - 0.5).toFixed(1)))}>−</button>
               <span className="text-slate-900 dark:text-white font-extrabold text-3xl flex-1 text-center">{runDist} km</span>
               <button className="stepper-btn" onClick={() => setRunDist(d => +(d + 0.5).toFixed(1))}>+</button>
             </div>
-            <button onClick={handleLogRun} className={`w-full py-3.5 bg-slate-100 dark:bg-[#1C2537] hover:bg-slate-200 dark:hover:bg-[#253347] active:scale-[0.98] text-slate-900 dark:text-white font-bold rounded-xl transition-all ${btnFlash === 'logRun' ? 'animate-btn-success' : ''}`}>
+            <button onClick={handleLogRun} className={`w-full py-3.5 bg-slate-100 dark:bg-ink-elevated hover:bg-slate-200 dark:hover:bg-ink-elevated active:scale-[0.98] text-slate-900 dark:text-white font-bold rounded-xl transition-all ${btnFlash === 'logRun' ? 'animate-btn-success' : ''}`}>
               Log Run
             </button>
             {todayRuns.length > 0 && (
               <div className="space-y-2 pt-1">
                 {todayRuns.map(run => (
-                  <div key={run.id} className={`flex items-center bg-slate-100 dark:bg-[#1C2537] rounded-xl px-4 py-3 ${newItemId === run.id ? 'animate-pop-in' : ''}`}>
-                    <span className="text-blue-500 font-bold flex-1">{run.distanceKm} km</span>
+                  <div key={run.id} className={`flex items-center bg-slate-100 dark:bg-ink-elevated rounded-xl px-4 py-3 ${newItemId === run.id ? 'animate-pop-in' : ''}`}>
+                    <span className="text-cobalt-500 font-bold flex-1">{run.distanceKm} km</span>
                     <button onClick={() => handleDeleteRun(run.id)} className="text-slate-400 dark:text-slate-600 hover:text-red-400 transition-colors"><Trash2 size={15} /></button>
                   </div>
                 ))}
@@ -1150,10 +1151,10 @@ export default function LogScreen() {
 
           {/* Import from Strava */}
           {stravaStatus?.connected && (
-            <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+            <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
               <button
                 onClick={() => showStravaPanel ? setShowStravaPanel(false) : handleOpenStravaPanel()}
-                className="w-full flex items-center px-4 py-3 hover:bg-slate-50 dark:hover:bg-[#1C2537] transition-colors"
+                className="w-full flex items-center px-4 py-3 hover:bg-slate-50 dark:hover:bg-ink-elevated transition-colors"
               >
                 <div className="w-6 h-6 rounded-full bg-[#FC4C02]/10 flex items-center justify-center mr-2.5 flex-shrink-0">
                   <span className="text-[#FC4C02] font-extrabold text-[10px]">S</span>
@@ -1163,7 +1164,7 @@ export default function LogScreen() {
               </button>
 
               {showStravaPanel && (
-                <div className="border-t border-slate-100 dark:border-[#1E2D45]">
+                <div className="border-t border-slate-100 dark:border-line">
                   {stravaLoading && (
                     <p className="text-slate-400 text-sm text-center py-6">Loading activities…</p>
                   )}
@@ -1183,7 +1184,7 @@ export default function LogScreen() {
                     const alreadyDone = importedIds.has(act.strava_id);
                     const isImporting = importingId === act.strava_id;
                     return (
-                      <div key={act.strava_id} className="flex items-center px-4 py-3 border-b border-slate-100 dark:border-[#1E2D45] last:border-0">
+                      <div key={act.strava_id} className="flex items-center px-4 py-3 border-b border-slate-100 dark:border-line last:border-0">
                         <div className="flex-1 min-w-0">
                           <p className="text-slate-900 dark:text-white text-sm font-semibold truncate">{act.name}</p>
                           <p className="text-slate-400 text-xs">{act.type} · {act.distance_km} km · {new Date(act.start_date).toLocaleDateString()}</p>
@@ -1216,7 +1217,7 @@ export default function LogScreen() {
           {gratitudeEntries.length > 0 && (
             <div className="space-y-2">
               {gratitudeEntries.map(entry => (
-                <div key={entry.id} className={`bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent ${newItemId === entry.id ? 'animate-pop-in' : ''}`}>
+                <div key={entry.id} className={`bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent ${newItemId === entry.id ? 'animate-pop-in' : ''}`}>
                   {entry.photoUrl && (
                     <button onClick={() => setLightboxUrl(entry.photoUrl!)} className="w-full block">
                       <img src={entry.photoUrl} alt="" className="w-full max-h-56 object-cover" />
@@ -1234,7 +1235,7 @@ export default function LogScreen() {
           )}
 
           {/* New entry form */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 space-y-3 shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 space-y-3 shadow-sm border border-slate-200 dark:border-transparent">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Gratitude</span>
               {gratitudeSaved && <span className="text-green-400 text-xs font-semibold">Saved</span>}
@@ -1253,7 +1254,7 @@ export default function LogScreen() {
 
             <textarea value={newGratitude} onChange={e => setNewGratitude(e.target.value)}
               placeholder="What are you grateful for?" rows={2}
-              className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+              className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
             />
 
             {photoError && <p className="text-red-400 text-xs">{photoError}</p>}
@@ -1265,12 +1266,12 @@ export default function LogScreen() {
                 onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoSelect(f); }}
               />
               <button onClick={() => photoInputRef.current?.click()}
-                className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors flex-shrink-0 ${pendingPhoto ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-500' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-[#253347]'}`}>
+                className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors flex-shrink-0 ${pendingPhoto ? 'bg-cobalt-500/15 dark:bg-cobalt-500/20 text-cobalt-500' : 'bg-slate-100 dark:bg-ink-elevated text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-ink-elevated'}`}>
                 <ImagePlus size={14} />
                 {pendingPhoto ? 'Change' : 'Photo'}
               </button>
               <button onClick={handleAddGratitude}
-                className={`flex-1 py-2.5 bg-slate-100 dark:bg-[#1C2537] hover:bg-slate-200 dark:hover:bg-[#253347] active:scale-[0.98] text-slate-600 dark:text-slate-300 font-semibold rounded-xl text-sm transition-all flex items-center justify-center gap-2 ${btnFlash === 'addGratitude' ? 'animate-btn-success' : ''}`}>
+                className={`flex-1 py-2.5 bg-slate-100 dark:bg-ink-elevated hover:bg-slate-200 dark:hover:bg-ink-elevated active:scale-[0.98] text-slate-600 dark:text-slate-300 font-semibold rounded-xl text-sm transition-all flex items-center justify-center gap-2 ${btnFlash === 'addGratitude' ? 'animate-btn-success' : ''}`}>
                 <Plus size={14} /> Add Entry
               </button>
             </div>
@@ -1290,12 +1291,12 @@ export default function LogScreen() {
       {logTab === 'weight' && (
         <div className="space-y-4">
           {/* Unit Selector */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-3">Unit</span>
             <div className="grid grid-cols-3 gap-2">
               {(['kg', 'lbs', 'stone'] as WeightUnit[]).map(u => (
                 <button key={u} onClick={() => handleChangeUnit(u)}
-                  className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${weightUnit === u ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-[#253347]'}`}>
+                  className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${weightUnit === u ? 'bg-cobalt-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-ink-elevated'}`}>
                   {u}
                 </button>
               ))}
@@ -1303,7 +1304,7 @@ export default function LogScreen() {
           </div>
 
           {/* Log Weight */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 space-y-3 shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 space-y-3 shadow-sm border border-slate-200 dark:border-transparent">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Log Weight</span>
             <div className="flex items-center gap-3">
               <button className="stepper-btn" onClick={() => setWeightDisplayValue(v => +(Math.max(WEIGHT_MIN, v - WEIGHT_STEP)).toFixed(1))}>−</button>
@@ -1313,13 +1314,13 @@ export default function LogScreen() {
             <div className="flex gap-2 justify-center">
               {WEIGHT_QUICK.map(d => (
                 <button key={d} onClick={() => setWeightDisplayValue(v => +(Math.max(WEIGHT_MIN, v + d)).toFixed(1))}
-                  className="text-xs text-blue-500 bg-slate-100 dark:bg-[#1C2537] px-3 py-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-[#253347] transition-colors font-semibold">
+                  className="text-xs text-cobalt-500 bg-slate-100 dark:bg-ink-elevated px-3 py-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-ink-elevated transition-colors font-semibold">
                   {d > 0 ? `+${d}` : d}
                 </button>
               ))}
             </div>
             <button onClick={handleLogWeight}
-              className={`w-full py-3.5 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-bold rounded-xl transition-all ${btnFlash === 'logWeight' ? 'animate-btn-success' : ''}`}>
+              className={`w-full py-3.5 bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-bold rounded-xl transition-all ${btnFlash === 'logWeight' ? 'animate-btn-success' : ''}`}>
               {logDate === today ? "Log Today's Weight" : `Log Weight for ${formatDate(logDate)}`}
             </button>
             {todayWeightEntry && (
@@ -1389,7 +1390,7 @@ function HabitCard({
   const allDone = completion === 1;
 
   return (
-    <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+    <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="text-slate-300 dark:text-slate-700 cursor-grab touch-none"><GripVertical size={14} /></div>
@@ -1426,7 +1427,7 @@ function HabitCard({
                 const done = entry?.checkpoints?.[cp.id] ?? false;
                 return (
                   <button key={cp.id} onClick={() => onToggleCheckpoint(cp.id)}
-                    className={`py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 ${done ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-[#253347]'}`}>
+                    className={`py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 ${done ? 'bg-cobalt-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-ink-elevated'}`}>
                     {cp.label}
                   </button>
                 );
@@ -1438,7 +1439,7 @@ function HabitCard({
 
       {habit.type === 'boolean' && (
         <button onClick={onToggleBoolean}
-          className={`w-full py-3 rounded-xl font-semibold transition-all active:scale-95 ${entry?.done ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-[#253347]'}`}>
+          className={`w-full py-3 rounded-xl font-semibold transition-all active:scale-95 ${entry?.done ? 'bg-cobalt-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-ink-elevated'}`}>
           {entry?.done ? 'Done ✓' : 'Mark done'}
         </button>
       )}
@@ -1499,7 +1500,7 @@ function AtomicHabitCard({
 
 
   return (
-    <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+    <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
       {/* Main row — always visible */}
       <div className="flex items-center px-4 py-3.5 gap-3">
         {/* Drag handle */}
@@ -1510,7 +1511,7 @@ function AtomicHabitCard({
         {/* Checkbox — primary tap target */}
         <button onClick={onToggleFull} className="flex-shrink-0 transition-all active:scale-90">
           <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-            isDone ? 'bg-blue-600' : 'border-2 border-slate-300 dark:border-slate-600 hover:border-blue-400'
+            isDone ? 'bg-cobalt-500' : 'border-2 border-slate-300 dark:border-slate-600 hover:border-cobalt-400'
           }`}>
             {isDone && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
           </div>
@@ -1543,7 +1544,7 @@ function AtomicHabitCard({
           <button
             onClick={onToggleMicro}
             className={`text-xs px-2.5 py-1 rounded-lg font-semibold flex-shrink-0 transition-all active:scale-95 ${
-              isMicro ? 'bg-yellow-500 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+              isMicro ? 'bg-yellow-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
             }`}
           >
             {isMicro ? '½ ✓' : 'Micro'}
@@ -1573,7 +1574,7 @@ function AtomicHabitCard({
                 key={cp.id}
                 onClick={e => { e.stopPropagation(); onToggleCheckpoint(cp.id); }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
-                  done ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-[#253347]'
+                  done ? 'bg-cobalt-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-ink-elevated'
                 }`}
               >
                 {done ? '✓ ' : ''}{cp.label}
@@ -1586,14 +1587,14 @@ function AtomicHabitCard({
 
       {/* Expanded details */}
       {expanded && (
-        <div className="border-t border-slate-100 dark:border-[#1E2D45] px-4 py-3 space-y-3">
+        <div className="border-t border-slate-100 dark:border-line px-4 py-3 space-y-3">
 
           {/* Micro version (full detail) */}
           {habit.microHabit && (
             <button
               onClick={onToggleMicro}
               className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all active:scale-[0.98] ${
-                isMicro ? 'bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700/40' : 'bg-slate-100 dark:bg-[#1C2537] hover:bg-slate-200 dark:hover:bg-[#253347]'
+                isMicro ? 'bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700/40' : 'bg-slate-100 dark:bg-ink-elevated hover:bg-slate-200 dark:hover:bg-ink-elevated'
               }`}
             >
               <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${
@@ -1621,7 +1622,7 @@ function AtomicHabitCard({
           {/* Reward */}
           {habit.reward && (
             <div className={`rounded-xl px-3 py-2.5 transition-all ${
-              isAnyDone ? 'bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700/30' : 'bg-slate-100 dark:bg-[#1C2537]'
+              isAnyDone ? 'bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700/30' : 'bg-slate-100 dark:bg-ink-elevated'
             }`}>
               {isAnyDone
                 ? <p className="text-sm text-green-700 dark:text-green-400">🎉 Nice work! Enjoy: <span className="font-semibold">{habit.reward}</span></p>
@@ -1672,7 +1673,7 @@ function AtomicHabitCard({
 
           {/* Edit + Archive + Delete */}
           <div className="flex items-center gap-3 pt-1">
-            <button onClick={onEdit} className="flex items-center gap-1.5 text-xs text-blue-500 hover:text-blue-400 transition-colors">
+            <button onClick={onEdit} className="flex items-center gap-1.5 text-xs text-cobalt-500 hover:text-cobalt-400 transition-colors">
               <Pencil size={12} /> Edit
             </button>
             {onCreateTask && (
@@ -1893,7 +1894,7 @@ function HabitRewardCard({
 
   if (editing) {
     return (
-      <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 space-y-3 shadow-sm border border-slate-200 dark:border-transparent">
+      <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 space-y-3 shadow-sm border border-slate-200 dark:border-transparent">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Reward Goal</span>
           {reward && (
@@ -1908,7 +1909,7 @@ function HabitRewardCard({
             value={goalName}
             onChange={e => setGoalName(e.target.value)}
             placeholder="e.g. New jumper"
-            className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+            className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -1918,13 +1919,13 @@ function HabitRewardCard({
               <input
                 value={currency}
                 onChange={e => setCurrency(e.target.value.slice(-1) || '£')}
-                className="w-8 bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-lg px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-8 bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-lg px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-1 focus:ring-cobalt-500"
               />
               <input
                 type="number" min={1} value={budgetStr}
                 onChange={e => setBudgetStr(e.target.value)}
                 onBlur={e => setBudgetStr(String(Math.max(1, parseFloat(e.target.value) || 1)))}
-                className="flex-1 bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="flex-1 bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500"
               />
             </div>
           </div>
@@ -1934,14 +1935,14 @@ function HabitRewardCard({
               type="number" min={0.01} step={0.5} value={earnStr}
               onChange={e => setEarnStr(e.target.value)}
               onBlur={e => setEarnStr(String(Math.max(0.01, parseFloat(e.target.value) || 0.01)))}
-              className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500"
             />
           </div>
         </div>
         <button
           onClick={handleSave}
           disabled={!goalName.trim()}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold rounded-xl transition-colors text-sm"
+          className="w-full py-3 bg-cobalt-500 hover:bg-cobalt-600 disabled:opacity-50 text-white font-bold rounded-xl transition-colors text-sm"
         >
           Save Goal
         </button>
@@ -1953,7 +1954,7 @@ function HabitRewardCard({
   const isComplete = (reward?.balance ?? 0) >= (reward?.budget ?? Infinity);
 
   return (
-    <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+    <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Reward</span>
         <button onClick={() => { setGoalName(reward?.goalName ?? ''); setBudgetStr(String(reward?.budget ?? 50)); setEarnStr(String(reward?.earnPerCompletion ?? 1)); setCurrency(reward?.currency ?? '£'); setEditing(true); }} className="text-slate-400 text-xs hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
@@ -1964,13 +1965,13 @@ function HabitRewardCard({
         <span className={`text-sm font-bold ${isComplete ? 'text-green-400' : 'text-slate-900 dark:text-white'}`}>
           {isComplete ? '🎉 ' : '🎁 '}{reward?.goalName}
         </span>
-        <span className={`text-sm font-extrabold tabular-nums ${isComplete ? 'text-green-400' : 'text-blue-500'}`}>
+        <span className={`text-sm font-extrabold tabular-nums ${isComplete ? 'text-green-400' : 'text-cobalt-500'}`}>
           {reward?.currency}{(reward?.balance ?? 0).toFixed(2)} / {reward?.currency}{reward?.budget}
         </span>
       </div>
-      <div className="h-2.5 bg-slate-100 dark:bg-[#1C2537] rounded-full overflow-hidden">
+      <div className="h-2.5 bg-slate-100 dark:bg-ink-elevated rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${isComplete ? 'bg-green-500' : 'bg-blue-500'}`}
+          className={`h-full rounded-full transition-all duration-500 ${isComplete ? 'bg-green-500' : 'bg-cobalt-500'}`}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -2054,13 +2055,13 @@ function HabitModal({
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-end" onClick={onClose}>
       <div
-        className="bg-slate-50 dark:bg-[#0A0F1E] w-full max-w-lg mx-auto rounded-t-3xl p-5 space-y-4"
+        className="bg-slate-50 dark:bg-ink w-full max-w-lg mx-auto rounded-t-3xl p-5 space-y-4"
         style={{ maxHeight: '90vh', overflowY: 'auto' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
           <h2 className="text-slate-900 dark:text-white font-extrabold text-xl">{isEdit ? 'Edit Habit' : 'New Habit'}</h2>
-          <button onClick={onClose} className="text-blue-500 font-semibold">Cancel</button>
+          <button onClick={onClose} className="text-cobalt-500 font-semibold">Cancel</button>
         </div>
 
         {/* Habit name */}
@@ -2069,7 +2070,7 @@ function HabitModal({
           value={name}
           onChange={e => setName(e.target.value)}
           placeholder="e.g. Run 10km, Morning meditation…"
-          className="w-full bg-white dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600 border border-slate-200 dark:border-transparent"
+          className="w-full bg-white dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600 border border-slate-200 dark:border-transparent"
         />
 
         {/* Frequency */}
@@ -2078,7 +2079,7 @@ function HabitModal({
           <div className="grid grid-cols-2 gap-2">
             {(['daily', 'specific_days'] as HabitFrequency[]).map(f => (
               <button key={f} onClick={() => setFrequency(f)}
-                className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${frequency === f ? 'bg-blue-600 text-white' : 'bg-white dark:bg-[#1C2537] text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#253347] border border-slate-200 dark:border-transparent'}`}>
+                className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${frequency === f ? 'bg-cobalt-500 text-white' : 'bg-white dark:bg-ink-elevated text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-ink-elevated border border-slate-200 dark:border-transparent'}`}>
                 {f === 'daily' ? 'Daily' : 'Specific days'}
               </button>
             ))}
@@ -2087,7 +2088,7 @@ function HabitModal({
             <div className="flex gap-1 mt-2">
               {DAY_LABELS.map((d, i) => (
                 <button key={i} onClick={() => toggleDay(i)}
-                  className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${specificDays.includes(i) ? 'bg-blue-600 text-white' : 'bg-white dark:bg-[#1C2537] text-slate-400 border border-slate-200 dark:border-transparent'}`}>
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${specificDays.includes(i) ? 'bg-cobalt-500 text-white' : 'bg-white dark:bg-ink-elevated text-slate-400 border border-slate-200 dark:border-transparent'}`}>
                   {d}
                 </button>
               ))}
@@ -2101,7 +2102,7 @@ function HabitModal({
           <div className="grid grid-cols-3 gap-2">
             {([undefined, 'am', 'pm'] as const).map(t => (
               <button key={t ?? 'none'} onClick={() => setTimeOfDay(t)}
-                className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${timeOfDay === t ? 'bg-blue-600 text-white' : 'bg-white dark:bg-[#1C2537] text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#253347] border border-slate-200 dark:border-transparent'}`}>
+                className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${timeOfDay === t ? 'bg-cobalt-500 text-white' : 'bg-white dark:bg-ink-elevated text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-ink-elevated border border-slate-200 dark:border-transparent'}`}>
                 {t === undefined ? 'Any' : t === 'am' ? 'Morning' : 'Evening'}
               </button>
             ))}
@@ -2115,7 +2116,7 @@ function HabitModal({
           {checkpoints.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-2">
               {checkpoints.map(cp => (
-                <div key={cp.id} className="flex items-center gap-1 bg-white dark:bg-[#1C2537] border border-slate-200 dark:border-transparent rounded-lg px-2.5 py-1.5">
+                <div key={cp.id} className="flex items-center gap-1 bg-white dark:bg-ink-elevated border border-slate-200 dark:border-transparent rounded-lg px-2.5 py-1.5">
                   <span className="text-sm text-slate-700 dark:text-white">{cp.label}</span>
                   <button onClick={() => setCheckpoints(prev => prev.filter(c => c.id !== cp.id))} className="text-slate-400 hover:text-red-400 transition-colors ml-1">
                     <X size={12} />
@@ -2135,7 +2136,7 @@ function HabitModal({
                 }
               }}
               placeholder="e.g. Breakfast, Lunch…"
-              className="flex-1 bg-white dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600 border border-slate-200 dark:border-transparent"
+              className="flex-1 bg-white dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600 border border-slate-200 dark:border-transparent"
             />
             <button
               onClick={() => {
@@ -2143,7 +2144,7 @@ function HabitModal({
                 setCheckpoints(prev => [...prev, { id: Date.now().toString(), label: newCheckpointLabel.trim() }]);
                 setNewCheckpointLabel('');
               }}
-              className="px-3 py-2 bg-slate-100 dark:bg-[#1C2537] hover:bg-slate-200 dark:hover:bg-[#253347] text-slate-600 dark:text-slate-300 text-sm font-semibold rounded-xl transition-colors"
+              className="px-3 py-2 bg-slate-100 dark:bg-ink-elevated hover:bg-slate-200 dark:hover:bg-ink-elevated text-slate-600 dark:text-slate-300 text-sm font-semibold rounded-xl transition-colors"
             >
               Add
             </button>
@@ -2160,7 +2161,7 @@ function HabitModal({
         </button>
 
         {showDetails && (
-          <div className="space-y-3 bg-white dark:bg-[#111827] rounded-xl p-4 border border-slate-200 dark:border-transparent">
+          <div className="space-y-3 bg-white dark:bg-ink-surface rounded-xl p-4 border border-slate-200 dark:border-transparent">
 
             {/* Cue */}
             <div>
@@ -2169,10 +2170,10 @@ function HabitModal({
               </label>
               <input value={cue} onChange={e => setCue(e.target.value)}
                 placeholder="e.g. After I wake up, At 6pm, After coffee"
-                className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
               {cue && name && (
-                <p className="text-xs text-blue-500/70 mt-1.5 italic">
+                <p className="text-xs text-cobalt-500/70 mt-1.5 italic">
                   "When {cue}, I will {name.toLowerCase()}."
                 </p>
               )}
@@ -2185,7 +2186,7 @@ function HabitModal({
               </label>
               <input value={microHabit} onChange={e => setMicroHabit(e.target.value)}
                 placeholder="e.g. Put on running shoes, Do 5 pushups"
-                className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
               <p className="text-slate-400 text-xs mt-1">The bare minimum when you can't do the full habit</p>
             </div>
@@ -2197,7 +2198,7 @@ function HabitModal({
               </label>
               <input value={reward} onChange={e => setReward(e.target.value)}
                 placeholder="e.g. Protein cookie, 10 min YouTube"
-                className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
             </div>
 
@@ -2208,7 +2209,7 @@ function HabitModal({
               </label>
               <input value={identity} onChange={e => setIdentity(e.target.value)}
                 placeholder="e.g. I am a disciplined runner"
-                className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
             </div>
 
@@ -2219,7 +2220,7 @@ function HabitModal({
               </label>
               <input value={nextAction} onChange={e => setNextAction(e.target.value)}
                 placeholder="e.g. Put book on pillow, Lay out running clothes"
-                className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
               <p className="text-slate-400 text-xs mt-1">A concrete prep step to make the habit easier to start</p>
             </div>
@@ -2231,7 +2232,7 @@ function HabitModal({
                 <p className="text-xs text-slate-400">e.g. "No phone before noon"</p>
               </div>
               <button onClick={() => setIsBadHabit(b => !b)}
-                className={`w-10 h-5 rounded-full relative transition-colors flex-shrink-0 ${isBadHabit ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                className={`w-10 h-5 rounded-full relative transition-colors flex-shrink-0 ${isBadHabit ? 'bg-cobalt-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
                 <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isBadHabit ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </button>
             </div>
@@ -2242,7 +2243,7 @@ function HabitModal({
         <button
           onClick={handleSave}
           disabled={!name.trim()}
-          className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-bold rounded-xl transition-colors"
+          className="w-full py-3.5 bg-cobalt-500 hover:bg-cobalt-600 disabled:opacity-40 text-white font-bold rounded-xl transition-colors"
         >
           {isEdit ? 'Save Changes' : 'Add Habit'}
         </button>
@@ -2291,7 +2292,7 @@ function CreateTaskFromHabitModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="w-full max-w-lg bg-white dark:bg-[#111827] rounded-t-3xl p-6 space-y-5 pb-10"
+        className="w-full max-w-lg bg-white dark:bg-ink-surface rounded-t-3xl p-6 space-y-5 pb-10"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
@@ -2305,7 +2306,7 @@ function CreateTaskFromHabitModal({
             value={title}
             onChange={e => setTitle(e.target.value)}
             autoFocus
-            className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500"
           />
         </div>
 
@@ -2316,7 +2317,7 @@ function CreateTaskFromHabitModal({
               <button
                 key={t}
                 onClick={() => setRecurrenceType(t)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${recurrenceType === t ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-600 dark:text-slate-300'}`}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${recurrenceType === t ? 'bg-cobalt-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-600 dark:text-slate-300'}`}
               >
                 {t === 'none' ? 'One-time' : t.charAt(0).toUpperCase() + t.slice(1)}
               </button>
@@ -2329,7 +2330,7 @@ function CreateTaskFromHabitModal({
                 <button
                   key={i}
                   onClick={() => toggleDay(i)}
-                  className={`w-9 h-9 rounded-full text-sm font-semibold transition-colors ${daysOfWeek.includes(i) ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-600 dark:text-slate-300'}`}
+                  className={`w-9 h-9 rounded-full text-sm font-semibold transition-colors ${daysOfWeek.includes(i) ? 'bg-cobalt-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-600 dark:text-slate-300'}`}
                 >
                   {label}
                 </button>
@@ -2350,7 +2351,7 @@ function CreateTaskFromHabitModal({
         <button
           onClick={handleSubmit}
           disabled={!title.trim()}
-          className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-bold rounded-xl transition-colors"
+          className="w-full py-3.5 bg-cobalt-500 hover:bg-cobalt-600 disabled:opacity-40 text-white font-bold rounded-xl transition-colors"
         >
           Add Task
         </button>

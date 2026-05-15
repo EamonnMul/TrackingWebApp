@@ -348,7 +348,7 @@ export default function TodayScreen() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-cobalt-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -360,8 +360,8 @@ export default function TodayScreen() {
 
       {/* Header */}
       <div>
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{greeting()}</p>
-        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-0.5">
+        <p className="screen-eyebrow text-cobalt-500">{greeting()}</p>
+        <h1 className="screen-title">
           {fmtDateLong(today)}
         </h1>
       </div>
@@ -370,18 +370,18 @@ export default function TodayScreen() {
       {(habits.length > 0 || todayPendingCount > 0) && (
         <div className="flex items-center gap-3">
           {habits.length > 0 && (
-            <div className="flex-1 bg-white dark:bg-[#111827] rounded-2xl px-4 py-3 border border-slate-200 dark:border-transparent shadow-sm">
+            <div className="flex-1 bg-white dark:bg-ink-surface rounded-2xl px-4 py-3 border border-slate-200 dark:border-transparent shadow-sm">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Habits</p>
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${progressPct}%` }} />
+                  <div className="h-full bg-cobalt-500 rounded-full transition-all" style={{ width: `${progressPct}%` }} />
                 </div>
                 <span className="text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0">{habitsDone}/{habits.length}</span>
               </div>
             </div>
           )}
           {todayPendingCount > 0 && (
-            <div className="bg-white dark:bg-[#111827] rounded-2xl px-4 py-3 border border-slate-200 dark:border-transparent shadow-sm shrink-0">
+            <div className="bg-white dark:bg-ink-surface rounded-2xl px-4 py-3 border border-slate-200 dark:border-transparent shadow-sm shrink-0">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tasks</p>
               <p className="text-xl font-extrabold text-slate-900 dark:text-white">{todayPendingCount}</p>
             </div>
@@ -393,11 +393,11 @@ export default function TodayScreen() {
       <section className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.1em]">Tasks</p>
-          <div className="flex bg-slate-100 dark:bg-[#1C2537] rounded-xl p-0.5 gap-0.5">
+          <div className="flex bg-slate-100 dark:bg-ink-elevated rounded-xl p-0.5 gap-0.5">
             {(['today', 'all'] as TaskView[]).map(v => (
               <button key={v} onClick={() => setTaskView(v)}
                 className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
-                  taskView === v ? 'bg-white dark:bg-[#253347] text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400'
+                  taskView === v ? 'bg-white dark:bg-ink-elevated text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400'
                 }`}>
                 {v === 'today' ? 'Today' : 'All'}
                 {v === 'all' && taskView !== 'all' && todos.filter(t => !t.done).length > todayPendingCount && (
@@ -409,7 +409,7 @@ export default function TodayScreen() {
         </div>
 
         {/* Add task */}
-        <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-transparent shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-ink-surface rounded-2xl border border-slate-200 dark:border-transparent shadow-sm overflow-hidden">
           <div className="flex items-center gap-2 px-3 py-2">
             <input
               ref={inputRef}
@@ -421,31 +421,31 @@ export default function TodayScreen() {
             />
             <button
               onClick={() => setShowAddOptions(s => !s)}
-              className={`p-1.5 rounded-lg transition-colors ${showAddOptions ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+              className={`p-1.5 rounded-lg transition-colors ${showAddOptions ? 'text-cobalt-500 bg-cobalt-500/10 dark:bg-cobalt-500/15' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
               title="More options"
             >
               <ChevronDown size={14} className={`transition-transform duration-200 ${showAddOptions ? 'rotate-180' : ''}`} />
             </button>
             <button onClick={handleAdd} disabled={!newTitle.trim()}
-              className="w-8 h-8 bg-blue-600 hover:bg-blue-500 disabled:opacity-30 active:scale-95 text-white rounded-xl flex items-center justify-center transition-all">
+              className="w-8 h-8 bg-cobalt-500 hover:bg-cobalt-600 disabled:opacity-30 active:scale-95 text-white rounded-xl flex items-center justify-center transition-all">
               <Plus size={15} />
             </button>
           </div>
 
           {showAddOptions && (
-            <div className="border-t border-slate-100 dark:border-[#1E2D45] px-3 py-3 space-y-3">
+            <div className="border-t border-slate-100 dark:border-line px-3 py-3 space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Due date</label>
                   <input type="date" value={newDueDate}
                     onChange={e => setNewDueDate(e.target.value)}
-                    className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                    className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500" />
                 </div>
                 <div>
                   <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Priority</label>
                   <select value={newPriority ?? ''}
                     onChange={e => setNewPriority((e.target.value as Todo['priority']) || undefined)}
-                    className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500">
                     <option value="">None</option>
                     <option value="high">🔴 High</option>
                     <option value="medium">🟡 Medium</option>
@@ -464,7 +464,7 @@ export default function TodayScreen() {
                     setNewRecurrence(type ? { type } : undefined);
                     if (!type) { setNewRecDays([]); setNewRecDayOfMonth(1); }
                   }}
-                  className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500">
                   <option value="">Does not repeat</option>
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
@@ -477,7 +477,7 @@ export default function TodayScreen() {
                       <button key={i} type="button"
                         onClick={() => setNewRecDays(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i])}
                         className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                          newRecDays.includes(i) ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-400'
+                          newRecDays.includes(i) ? 'bg-cobalt-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-400'
                         }`}>{d}</button>
                     ))}
                   </div>
@@ -488,7 +488,7 @@ export default function TodayScreen() {
                     <span className="text-xs text-slate-400">Day</span>
                     <input type="number" min={1} max={28} value={newRecDayOfMonth}
                       onChange={e => setNewRecDayOfMonth(Math.min(28, Math.max(1, +e.target.value)))}
-                      className="w-14 bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-14 bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500"
                     />
                     <span className="text-xs text-slate-400">of each month</span>
                   </div>
@@ -500,7 +500,7 @@ export default function TodayScreen() {
 
         {/* Incomplete tasks */}
         {incompleteTodos.length > 0 && (
-          <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
             {incompleteTodos.map((todo, idx) => (
               <TaskItem
                 key={todo.id}
@@ -530,8 +530,8 @@ export default function TodayScreen() {
 
         {/* Completed tasks */}
         {completedTodos.length > 0 && (
-          <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
-            <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-[#1E2D45]">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+            <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-line">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Completed ({completedTodos.length})
               </span>
@@ -574,18 +574,18 @@ export default function TodayScreen() {
       {habits.length > 0 && (
         <section>
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Habits</p>
-          <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden border border-slate-200 dark:border-transparent shadow-sm">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden border border-slate-200 dark:border-transparent shadow-sm">
             {habits.map(habit => {
               const entry = habitEntries[habit.id];
               const done = isHabitDone(habit, entry);
               const streak = habit.streakCount ?? 0;
               const linkedPendingTasks = todos.filter(t => !t.done && t.sourceHabitId === habit.id);
               return (
-                <div key={habit.id} className="border-b border-slate-100 dark:border-[#1E2D45] last:border-0">
+                <div key={habit.id} className="border-b border-slate-100 dark:border-line last:border-0">
                   <div className="flex items-center px-4 py-3.5 gap-3">
                     <button onClick={() => toggleHabit(habit.id)} className="flex-shrink-0 transition-all active:scale-90">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                        done ? 'bg-blue-600' : 'border-2 border-slate-300 dark:border-slate-600 hover:border-blue-400'
+                        done ? 'bg-cobalt-500' : 'border-2 border-slate-300 dark:border-slate-600 hover:border-cobalt-400'
                       }`}>
                         {done && <Check size={12} className="text-white" />}
                       </div>
@@ -619,7 +619,7 @@ export default function TodayScreen() {
 
       {/* ── Smart suggestion ──────────────────────────────────────────────── */}
       {suggestion && !suggestionDismissed && (
-        <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 border border-violet-200 dark:border-violet-900/30 shadow-sm">
+        <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 border border-violet-200 dark:border-violet-900/30 shadow-sm">
           <div className="flex items-start gap-3">
             <Lightbulb size={16} className="text-violet-400 mt-0.5 shrink-0" />
             <div className="flex-1">
@@ -691,11 +691,11 @@ function TaskItem({
   const isOverdue = todo.dueDate && todo.dueDate < today && !todo.done;
 
   return (
-    <div className="border-b border-slate-100 dark:border-[#1E2D45] last:border-0">
+    <div className="border-b border-slate-100 dark:border-line last:border-0">
       <div className="flex items-center px-4 py-3 gap-3">
         <button onClick={onToggle}
           className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-            todo.done ? 'bg-blue-600 border-blue-600' : 'border-slate-600 hover:border-blue-500'
+            todo.done ? 'bg-cobalt-500 border-cobalt-500' : 'border-slate-600 hover:border-cobalt-500'
           }`}>
           {todo.done && <div className="w-2 h-2 rounded-full bg-white" />}
         </button>
@@ -726,7 +726,7 @@ function TaskItem({
                 </span>
               )}
               {todo.recurrence && (
-                <span className="text-[10px] text-blue-400 flex items-center gap-0.5">
+                <span className="text-[10px] text-cobalt-400 flex items-center gap-0.5">
                   <Repeat2 size={9} /> {todo.recurrence.type}
                 </span>
               )}
@@ -743,14 +743,14 @@ function TaskItem({
       </div>
 
       {isExpanded && (
-        <div className="px-4 pb-4 space-y-3 border-t border-slate-100 dark:border-[#1E2D45] pt-3">
+        <div className="px-4 pb-4 space-y-3 border-t border-slate-100 dark:border-line pt-3">
           <textarea
             value={notesValue}
             onChange={e => setNotesValue(e.target.value)}
             onBlur={() => onUpdate({ notes: notesValue.trim() || undefined })}
             placeholder="Add notes…"
             rows={2}
-            className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-600"
+            className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-600"
           />
 
           <div className="grid grid-cols-2 gap-2">
@@ -758,13 +758,13 @@ function TaskItem({
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">Due date</label>
               <input type="date" value={todo.dueDate ?? ''}
                 onChange={e => onUpdate({ dueDate: e.target.value || undefined })}
-                className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500" />
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">Priority</label>
               <select value={todo.priority ?? ''}
                 onChange={e => onUpdate({ priority: (e.target.value as Todo['priority']) || undefined })}
-                className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500">
                 <option value="">None</option>
                 <option value="high">🔴 High</option>
                 <option value="medium">🟡 Medium</option>
@@ -779,7 +779,7 @@ function TaskItem({
               <span className="text-slate-400 text-sm">Add to Today</span>
             </div>
             <button onClick={() => onUpdate({ myDay: !todo.myDay })}
-              className={`w-10 h-5 rounded-full transition-colors relative flex-shrink-0 ${todo.myDay ? 'bg-blue-600' : 'bg-slate-700'}`}>
+              className={`w-10 h-5 rounded-full transition-colors relative flex-shrink-0 ${todo.myDay ? 'bg-cobalt-500' : 'bg-slate-700'}`}>
               <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${todo.myDay ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </button>
           </div>
@@ -808,7 +808,7 @@ function TaskItem({
                   });
                 }
               }}
-              className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500"
             >
               <option value="">Does not repeat</option>
               <option value="daily">Daily</option>
@@ -827,8 +827,8 @@ function TaskItem({
                     }}
                     className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors ${
                       (todo.recurrence?.daysOfWeek ?? []).includes(i)
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-100 dark:bg-[#1C2537] text-slate-400'
+                        ? 'bg-cobalt-500 text-white'
+                        : 'bg-slate-100 dark:bg-ink-elevated text-slate-400'
                     }`}
                   >{d}</button>
                 ))}
@@ -841,7 +841,7 @@ function TaskItem({
                 <input type="number" min={1} max={28}
                   value={todo.recurrence.dayOfMonth ?? 1}
                   onChange={e => onUpdate({ recurrence: { ...todo.recurrence!, dayOfMonth: Math.min(28, Math.max(1, +e.target.value)) } })}
-                  className="w-14 bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-14 bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500"
                 />
                 <span className="text-xs text-slate-400">of each month</span>
               </div>
@@ -856,12 +856,12 @@ function TaskItem({
 
           {!todo.sourceHabitId && !todo.done && (
             <button onClick={onConvertToHabit}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-400 hover:border-blue-400 hover:text-blue-400 transition-colors">
+              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-400 hover:border-cobalt-400 hover:text-cobalt-400 transition-colors">
               ↻ Convert to habit
             </button>
           )}
 
-          <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-[#1E2D45]">
+          <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-line">
             <button onClick={onMoveUp} disabled={isFirst}
               className="text-slate-600 hover:text-slate-300 disabled:opacity-30 transition-colors text-lg px-2">↑</button>
             <button onClick={onMoveDown} disabled={isLast}

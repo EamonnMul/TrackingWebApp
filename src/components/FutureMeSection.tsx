@@ -106,14 +106,14 @@ export default function FutureMeSection() {
       </div>
 
       {/* Pending / Delivered tabs */}
-      <div className="flex gap-1 bg-slate-100 dark:bg-[#1C2537] rounded-xl p-1 mb-3">
+      <div className="flex gap-1 bg-slate-100 dark:bg-ink-elevated rounded-xl p-1 mb-3">
         {(['pending', 'delivered'] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               tab === t
-                ? 'bg-white dark:bg-[#0A0F1E] text-slate-900 dark:text-white shadow-sm'
+                ? 'bg-white dark:bg-ink text-slate-900 dark:text-white shadow-sm'
                 : 'text-slate-400 dark:text-slate-500'
             }`}
           >
@@ -131,10 +131,10 @@ export default function FutureMeSection() {
               <p className="text-sm text-slate-400">Write a message to your future self.</p>
             </div>
           ) : pending.map(m => (
-            <div key={m.id} className="bg-white dark:bg-[#111827] rounded-2xl p-4 border border-slate-200 dark:border-transparent shadow-sm">
+            <div key={m.id} className="bg-white dark:bg-ink-surface rounded-2xl p-4 border border-slate-200 dark:border-transparent shadow-sm">
               <p className="text-sm text-slate-500 dark:text-slate-600 italic mb-2">✉️ Sealed — opens {fmtDate(m.deliverAt)}</p>
               <div className="flex justify-end gap-3">
-                <button onClick={() => openCompose(m)} className="text-slate-400 hover:text-blue-400 transition-colors">
+                <button onClick={() => openCompose(m)} className="text-slate-400 hover:text-cobalt-400 transition-colors">
                   <Edit2 size={13} />
                 </button>
                 <button onClick={() => handleDelete(m.id)} className="text-slate-400 hover:text-red-400 transition-colors">
@@ -154,7 +154,7 @@ export default function FutureMeSection() {
               <p className="text-sm text-slate-400">No delivered messages yet.</p>
             </div>
           ) : delivered.map(m => (
-            <div key={m.id} className="bg-white dark:bg-[#111827] rounded-2xl p-4 border border-violet-200 dark:border-violet-900/30 shadow-sm">
+            <div key={m.id} className="bg-white dark:bg-ink-surface rounded-2xl p-4 border border-violet-200 dark:border-violet-900/30 shadow-sm">
               <div className="flex items-center gap-1.5 text-violet-500 text-[10px] font-bold uppercase tracking-wider mb-2">
                 <CheckCircle2 size={11} />
                 <span>Delivered {m.deliveredAt ? fmtDate(m.deliveredAt) : ''}</span>
@@ -174,7 +174,7 @@ export default function FutureMeSection() {
       {composing && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setComposing(false)} />
-          <div className="relative w-full max-w-sm bg-white dark:bg-[#111827] rounded-3xl shadow-2xl p-6 animate-pop-in">
+          <div className="relative w-full max-w-sm bg-white dark:bg-ink-surface rounded-3xl shadow-2xl p-6 animate-pop-in">
             <p className="text-[11px] font-bold text-violet-500 uppercase tracking-[0.12em] mb-1">
               {editing ? 'Edit message' : 'Write to Future Me'}
             </p>
@@ -192,7 +192,7 @@ export default function FutureMeSection() {
                 placeholder="Hey future me, I'm proud of you for..."
                 rows={4}
                 autoFocus
-                className="w-full bg-slate-50 dark:bg-[#1C2537] text-slate-900 dark:text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-sm resize-none outline-none border-2 border-transparent focus:border-violet-400 transition-colors"
+                className="w-full bg-slate-50 dark:bg-ink-elevated text-slate-900 dark:text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-sm resize-none outline-none border-2 border-transparent focus:border-violet-400 transition-colors"
               />
             </div>
 
@@ -205,7 +205,7 @@ export default function FutureMeSection() {
                 value={deliverAt}
                 min={minDatetime()}
                 onChange={e => setDeliverAt(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm outline-none border-2 border-transparent focus:border-violet-400 transition-colors"
+                className="w-full bg-slate-50 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm outline-none border-2 border-transparent focus:border-violet-400 transition-colors"
               />
             </div>
 

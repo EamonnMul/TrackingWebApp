@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User } from 'firebase/auth';
+import { Sun, Moon } from 'lucide-react';
 import { auth } from './firebase';
 import BottomNav from './components/BottomNav';
 import LogScreen from './screens/LogScreen';
@@ -28,8 +29,8 @@ export default function App() {
 
   if (user === 'loading') {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#0A0F1E] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-slate-50 dark:bg-ink flex items-center justify-center">
+        <div className="w-9 h-9 border-2 border-cobalt-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -40,14 +41,31 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-slate-50 dark:bg-[#0A0F1E]">
-        {/* Theme toggle — fixed top-right */}
+      <div className="min-h-screen bg-slate-50 dark:bg-ink relative">
+        {/* Subtle radial vignette in dark mode */}
+        <div
+          className="hidden dark:block fixed inset-0 pointer-events-none -z-10"
+          style={{
+            background:
+              'radial-gradient(circle at 50% 0%, rgba(61,123,255,0.08), transparent 55%)',
+          }}
+        />
+
+        {/* Theme toggle */}
         <button
           onClick={() => setDark(d => !d)}
-          className="fixed top-4 right-4 z-50 w-9 h-9 rounded-full bg-white dark:bg-[#1C2537] shadow-md border border-slate-200 dark:border-[#1E2D45] flex items-center justify-center text-base transition-colors"
+          className="fixed top-4 right-4 z-50 w-9 h-9 rounded-full
+                     bg-white dark:bg-ink-surface
+                     border border-slate-200 dark:border-line
+                     shadow-card hover:shadow-elevated
+                     flex items-center justify-center
+                     text-slate-600 dark:text-slate-300
+                     hover:text-cobalt-500 dark:hover:text-cobalt-400
+                     active:scale-95 transition-all"
           title="Toggle theme"
+          aria-label="Toggle theme"
         >
-          {dark ? '☀️' : '🌙'}
+          {dark ? <Sun size={16} /> : <Moon size={16} />}
         </button>
 
         <div className="max-w-lg mx-auto px-4 pt-6 pb-28">
@@ -67,6 +85,8 @@ export default function App() {
   );
 }
 
+/* ─── Sign-in page ────────────────────────────────────────────────────────── */
+
 function SignInPage({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -83,36 +103,60 @@ function SignInPage({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () 
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0F1E] flex flex-col items-center justify-center px-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-ink flex flex-col items-center justify-center px-6 relative overflow-hidden">
+      {/* Glow background */}
+      <div
+        className="hidden dark:block absolute inset-0 pointer-events-none -z-10"
+        style={{
+          background:
+            'radial-gradient(circle at 50% 30%, rgba(61,123,255,0.16), transparent 55%), radial-gradient(circle at 80% 90%, rgba(255,122,26,0.08), transparent 50%)',
+        }}
+      />
+
       <button
         onClick={onToggleTheme}
-        className="fixed top-4 right-4 z-50 w-9 h-9 rounded-full bg-white dark:bg-[#1C2537] shadow-md border border-slate-200 dark:border-[#1E2D45] flex items-center justify-center text-base transition-colors"
+        className="fixed top-4 right-4 z-50 w-9 h-9 rounded-full
+                   bg-white dark:bg-ink-surface
+                   border border-slate-200 dark:border-line shadow-card
+                   flex items-center justify-center
+                   text-slate-600 dark:text-slate-300 active:scale-95 transition-all"
+        aria-label="Toggle theme"
       >
-        {dark ? '☀️' : '🌙'}
+        {dark ? <Sun size={16} /> : <Moon size={16} />}
       </button>
 
-      <div className="text-center mb-12">
-        <div className="text-6xl mb-4">🏋️</div>
-        <h1 className="text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-          Big Dawg<br />Lifts
+      <div className="text-center mb-12 animate-fade-in">
+        <p className="eyebrow-fire mb-3">Big Dawg · Built Different</p>
+        <h1 className="text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-[0.95]">
+          Track the<br />
+          <span className="bg-gradient-to-r from-cobalt-400 to-cobalt-500 bg-clip-text text-transparent">
+            grind.
+          </span>
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-3 text-base">Track the grind. Own the gains.</p>
+        <p className="text-slate-500 dark:text-slate-400 mt-4 text-base">
+          Daily reps. Real habits. No fluff.
+        </p>
       </div>
 
       <button
         onClick={signIn}
         disabled={loading}
-        className="flex items-center gap-3 bg-white text-gray-800 font-semibold px-6 py-3.5 rounded-2xl hover:bg-gray-100 active:scale-95 transition-all disabled:opacity-60 shadow-lg"
+        className="inline-flex items-center gap-3 bg-white text-gray-800 font-semibold
+                   px-6 py-3.5 rounded-2xl shadow-deep
+                   hover:bg-gray-50 active:scale-[0.98] transition-all
+                   disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading ? (
           <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
         ) : (
           <GoogleIcon />
         )}
-        {loading ? 'Signing in...' : 'Sign in with Google'}
+        {loading ? 'Signing in…' : 'Sign in with Google'}
       </button>
 
-      {error && <p className="text-red-400 text-sm mt-4">{error}</p>}
+      {error && (
+        <p className="text-red-400 text-sm mt-4 animate-fade-in">{error}</p>
+      )}
     </div>
   );
 }

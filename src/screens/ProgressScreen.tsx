@@ -468,7 +468,7 @@ export default function ProgressScreen() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-cobalt-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -481,8 +481,9 @@ export default function ProgressScreen() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Progress</h1>
-        <p className="text-slate-400 text-sm mt-0.5">The gains don't lie.</p>
+        <p className="screen-eyebrow text-cobalt-500">Stats · All Time</p>
+        <h1 className="screen-title">Progress</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">The gains don't lie.</p>
       </div>
 
       {/* Sub-tabs — drag to reorder */}
@@ -505,7 +506,7 @@ export default function ProgressScreen() {
             <select
               value={selectedExerciseId}
               onChange={e => setSelectedExerciseId(e.target.value)}
-              className="w-full bg-white dark:bg-[#111827] text-slate-900 dark:text-white border border-slate-200 dark:border-transparent rounded-2xl px-4 py-3 text-sm font-semibold appearance-none shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-white dark:bg-ink-surface text-slate-900 dark:text-white border border-slate-200 dark:border-transparent rounded-2xl px-4 py-3 text-sm font-semibold appearance-none shadow-sm focus:outline-none focus:ring-2 focus:ring-cobalt-500"
             >
               <option value={ALL_EXERCISES_ID}>All Exercises</option>
               {exercises.map(ex => (
@@ -519,15 +520,15 @@ export default function ProgressScreen() {
 
 
           {!isAllView && activeWorkouts.length > 0 && (
-            <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 flex items-center justify-between shadow-sm border border-slate-200 dark:border-transparent">
+            <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 flex items-center justify-between shadow-sm border border-slate-200 dark:border-transparent">
               <span className="text-slate-500 dark:text-slate-400 text-sm">Daily target (today)</span>
               {exerciseTarget === undefined ? (
                 <span className="text-slate-400 text-xs italic">Not set — toggle in Log tab</span>
               ) : (
                 <div className="flex items-center gap-2">
-                  <button onClick={() => adjustTarget(-5)} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#1C2537] text-slate-700 dark:text-slate-300 text-lg hover:bg-slate-200 dark:hover:bg-[#253347] transition-colors">−</button>
+                  <button onClick={() => adjustTarget(-5)} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-ink-elevated text-slate-700 dark:text-slate-300 text-lg hover:bg-slate-200 dark:hover:bg-ink-elevated transition-colors">−</button>
                   <span className="text-slate-900 dark:text-white font-bold text-sm w-16 text-center">{exerciseTarget} reps</span>
-                  <button onClick={() => adjustTarget(5)} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#1C2537] text-slate-700 dark:text-slate-300 text-lg hover:bg-slate-200 dark:hover:bg-[#253347] transition-colors">+</button>
+                  <button onClick={() => adjustTarget(5)} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-ink-elevated text-slate-700 dark:text-slate-300 text-lg hover:bg-slate-200 dark:hover:bg-ink-elevated transition-colors">+</button>
                 </div>
               )}
             </div>
@@ -539,7 +540,7 @@ export default function ProgressScreen() {
           )}
 
           {/* Calendar — collapsible */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
             <button onClick={() => setShowCalendar(c => !c)} className="w-full flex items-center justify-between px-4 py-3">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Calendar</span>
               <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${showCalendar ? 'rotate-180' : ''}`} />
@@ -553,13 +554,13 @@ export default function ProgressScreen() {
                     const r = w?.sets.reduce((s, x) => s + x.reps, 0) ?? 0;
                     const dayTarget = isAllView ? undefined : getTargetForDate(targetHistory, ds, dailyTarget);
                     if (dayTarget !== undefined && r >= dayTarget) return 'bg-green-600 text-white';
-                    if (r > 0) return 'bg-blue-500/60 text-blue-900 dark:text-blue-200';
-                    return 'bg-slate-100 dark:bg-[#1C2537] text-slate-400 dark:text-slate-600';
+                    if (r > 0) return 'bg-cobalt-500/60 text-cobalt-700 dark:text-cobalt-300';
+                    return 'bg-slate-100 dark:bg-ink-elevated text-slate-400 dark:text-slate-600';
                   }}
                   legend={
                     <>
                       <LegendItem color="bg-green-600" label="Hit target" />
-                      <LegendItem color="bg-blue-500/60" label="Partial" />
+                      <LegendItem color="bg-cobalt-500/60" label="Partial" />
                     </>
                   }
                 />
@@ -586,7 +587,7 @@ export default function ProgressScreen() {
       {progressTab === 'running' && (
         <>
           {/* Strava connection */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl px-4 py-3 shadow-sm border border-slate-200 dark:border-transparent flex items-center gap-3">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl px-4 py-3 shadow-sm border border-slate-200 dark:border-transparent flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
               <span className="text-[#FC4C02] font-extrabold text-xs">S</span>
             </div>
@@ -605,7 +606,7 @@ export default function ProgressScreen() {
             {stravaStatus?.connected ? (
               <button
                 onClick={async () => { await disconnectStrava(); setStravaStatus({ connected: false }); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-[#1C2537] hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-ink-elevated hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors"
               >
                 <Link2Off size={13} /> Disconnect
               </button>
@@ -621,7 +622,7 @@ export default function ProgressScreen() {
           </div>
 
           {/* Calendar — collapsible */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
             <button onClick={() => setShowCalendar(c => !c)} className="w-full flex items-center justify-between px-4 py-3">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Calendar</span>
               <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${showCalendar ? 'rotate-180' : ''}`} />
@@ -630,7 +631,7 @@ export default function ProgressScreen() {
               <div className="px-2 pb-3">
                 <BaseCalendar
                   onDayPress={setSelectedDate}
-                  cellStyle={ds => runs.some(r => r.date === ds) ? 'bg-orange-500 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-400 dark:text-slate-600'}
+                  cellStyle={ds => runs.some(r => r.date === ds) ? 'bg-orange-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-400 dark:text-slate-600'}
                   legend={<LegendItem color="bg-orange-500" label="Run logged" />}
                 />
               </div>
@@ -638,11 +639,11 @@ export default function ProgressScreen() {
           </div>
 
           {/* Range selector */}
-          <div className="flex bg-white dark:bg-[#111827] rounded-2xl p-1 gap-1 shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="flex bg-white dark:bg-ink-surface rounded-2xl p-1 gap-1 shadow-sm border border-slate-200 dark:border-transparent">
             {(['week', 'month', 'year', 'all'] as const).map(r => (
               <button key={r} onClick={() => setRunRange(r)}
                 className={`flex-1 py-2 rounded-xl text-[10px] font-semibold capitalize transition-colors ${
-                  runRange === r ? 'bg-blue-600 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                  runRange === r ? 'bg-cobalt-500 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                 }`}>
                 {r === 'all' ? 'All Time' : r === 'week' ? 'This Week' : r === 'month' ? 'This Month' : 'This Year'}
               </button>
@@ -662,15 +663,15 @@ export default function ProgressScreen() {
                   <StatCard label="Avg / run" value={rangeRuns.length > 0 ? `${(rangeKm / rangeRuns.length).toFixed(1)} km` : '—'} />
                 </div>
                 {rangeRuns.length > 0 ? (
-                  <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
-                    <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-[#1E2D45]">
+                  <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+                    <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-line">
                       <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Runs — {rangeRuns.length} logged, {rangeDays} days</span>
                     </div>
                     {[...rangeRuns].sort((a, b) => b.date.localeCompare(a.date)).map(r => (
-                      <div key={r.id} className="flex items-center px-4 py-3 border-b border-slate-100 dark:border-[#1E2D45] last:border-0">
+                      <div key={r.id} className="flex items-center px-4 py-3 border-b border-slate-100 dark:border-line last:border-0">
                         <span className="text-slate-500 dark:text-slate-400 text-sm flex-1">{formatDate(r.date)}</span>
                         <span className="text-orange-500 font-bold text-sm mr-3">{r.distanceKm} km</span>
-                        <button onClick={() => navigate(`/?date=${r.date}`)} className="text-slate-300 dark:text-slate-700 hover:text-blue-500 transition-colors" title="Edit this day">
+                        <button onClick={() => navigate(`/?date=${r.date}`)} className="text-slate-300 dark:text-slate-700 hover:text-cobalt-500 transition-colors" title="Edit this day">
                           <Pencil size={12} />
                         </button>
                       </div>
@@ -693,16 +694,16 @@ export default function ProgressScreen() {
           {allHabits.length > 1 && (
             <div className="relative">
               <button onClick={() => setShowHabitDropdown(d => !d)}
-                className="w-full flex items-center justify-between bg-white dark:bg-[#111827] hover:bg-slate-50 dark:hover:bg-[#1C2537] rounded-2xl px-4 py-3 transition-colors shadow-sm border border-slate-200 dark:border-transparent">
+                className="w-full flex items-center justify-between bg-white dark:bg-ink-surface hover:bg-slate-50 dark:hover:bg-ink-elevated rounded-2xl px-4 py-3 transition-colors shadow-sm border border-slate-200 dark:border-transparent">
                 <span className="text-slate-900 dark:text-white font-semibold text-sm">{habitDisplayName(selectedHabit)}</span>
                 <ChevronDown size={16} className={`text-slate-400 transition-transform duration-200 ${showHabitDropdown ? 'rotate-180' : ''}`} />
               </button>
               {showHabitDropdown && (
-                <div className="mt-1 bg-slate-100 dark:bg-[#1C2537] rounded-xl overflow-hidden z-10 relative border border-slate-200 dark:border-transparent">
+                <div className="mt-1 bg-slate-100 dark:bg-ink-elevated rounded-xl overflow-hidden z-10 relative border border-slate-200 dark:border-transparent">
                   {allHabits.map(h => (
                     <button key={h.id} onClick={() => { setSelectedHabitId(h.id); setShowHabitDropdown(false); }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left text-sm hover:bg-slate-200 dark:hover:bg-[#253347] transition-colors border-b border-slate-200 dark:border-[#253347] last:border-0 ${h.id === selectedHabitId ? 'text-slate-900 dark:text-white font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
-                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${h.id === selectedHabitId ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-700'}`} />
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left text-sm hover:bg-slate-200 dark:hover:bg-ink-elevated transition-colors border-b border-slate-200 dark:border-[#253347] last:border-0 ${h.id === selectedHabitId ? 'text-slate-900 dark:text-white font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
+                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${h.id === selectedHabitId ? 'bg-cobalt-500' : 'bg-slate-300 dark:bg-slate-700'}`} />
                       {habitDisplayName(h)}
                     </button>
                   ))}
@@ -714,7 +715,7 @@ export default function ProgressScreen() {
           {selectedHabit && (
             <>
               {/* Calendar — collapsible */}
-              <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+              <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
                 <button onClick={() => setShowCalendar(c => !c)} className="w-full flex items-center justify-between px-4 py-3">
                   <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Calendar</span>
                   <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${showCalendar ? 'rotate-180' : ''}`} />
@@ -727,7 +728,7 @@ export default function ProgressScreen() {
                         const c = habitCompletion(selectedHabit, habitEntriesMap[ds] ?? null);
                         if (c === 1) return 'bg-purple-600 text-white';
                         if (c > 0) return 'bg-purple-500/50 text-purple-900 dark:text-purple-200';
-                        return 'bg-slate-100 dark:bg-[#1C2537] text-slate-400 dark:text-slate-600';
+                        return 'bg-slate-100 dark:bg-ink-elevated text-slate-400 dark:text-slate-600';
                       }}
                       legend={
                         <>
@@ -749,8 +750,8 @@ export default function ProgressScreen() {
               </div>
 
               {/* Daily Log */}
-              <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
-                <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-[#1E2D45]">
+              <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+                <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-line">
                   <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Daily Log — {habitDisplayName(selectedHabit)}</span>
                 </div>
                 {Object.keys(habitEntriesMap).length === 0 ? (
@@ -770,7 +771,7 @@ export default function ProgressScreen() {
       {progressTab === 'gratitude' && (
         <>
           {/* Calendar — collapsible */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
             <button onClick={() => setShowCalendar(c => !c)} className="w-full flex items-center justify-between px-4 py-3">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Calendar</span>
               <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${showCalendar ? 'rotate-180' : ''}`} />
@@ -779,7 +780,7 @@ export default function ProgressScreen() {
               <div className="px-2 pb-3">
                 <BaseCalendar
                   onDayPress={setSelectedDate}
-                  cellStyle={ds => (gratitudeMap[ds]?.length ?? 0) > 0 ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-400 dark:text-slate-600'}
+                  cellStyle={ds => (gratitudeMap[ds]?.length ?? 0) > 0 ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-400 dark:text-slate-600'}
                   legend={<LegendItem color="bg-amber-500" label="Entry written" />}
                 />
               </div>
@@ -793,7 +794,7 @@ export default function ProgressScreen() {
           </div>
 
           {/* Add Entry */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
             <button onClick={() => setShowAddGratitude(s => !s)} className="w-full flex items-center justify-between px-4 py-3">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add Entry</span>
               <Plus size={14} className="text-slate-400" />
@@ -802,7 +803,7 @@ export default function ProgressScreen() {
               <div className="px-4 pb-4 space-y-2">
                 <input type="date" max={today} value={newGratitudeDate}
                   onChange={e => setNewGratitudeDate(e.target.value)}
-                  className="w-full text-sm bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 border-none"
+                  className="w-full text-sm bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-cobalt-500 border-none"
                 />
                 {newGratitudePhotoPreview && (
                   <div className="relative rounded-xl overflow-hidden">
@@ -815,7 +816,7 @@ export default function ProgressScreen() {
                 )}
                 <textarea value={newGratitudeText} onChange={e => setNewGratitudeText(e.target.value)}
                   placeholder="What are you grateful for?" rows={2}
-                  className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                  className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
                 />
                 {gratitudePhotoError && <p className="text-red-400 text-xs">{gratitudePhotoError}</p>}
                 <input ref={progressPhotoInputRef} type="file" accept="image/*" capture="environment" className="hidden"
@@ -831,12 +832,12 @@ export default function ProgressScreen() {
                 />
                 <div className="flex gap-2">
                   <button onClick={() => progressPhotoInputRef.current?.click()}
-                    className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors flex-shrink-0 ${newGratitudePhoto ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-500' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-[#253347]'}`}>
+                    className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors flex-shrink-0 ${newGratitudePhoto ? 'bg-cobalt-500/15 dark:bg-cobalt-500/20 text-cobalt-500' : 'bg-slate-100 dark:bg-ink-elevated text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-ink-elevated'}`}>
                     <ImagePlus size={14} />
                     {newGratitudePhoto ? 'Change' : 'Photo'}
                   </button>
                   <button onClick={handleAddGratitudeEntry}
-                    className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-semibold rounded-xl text-sm transition-all">
+                    className="flex-1 py-2.5 bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-semibold rounded-xl text-sm transition-all">
                     Save
                   </button>
                 </div>
@@ -849,10 +850,10 @@ export default function ProgressScreen() {
             {Object.entries(gratitudeMap)
               .sort(([a], [b]) => b.localeCompare(a))
               .map(([date, entries]) => (
-                <div key={date} className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+                <div key={date} className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
                   <div className="px-4 pt-4 pb-2 flex items-center gap-2">
                     <span className="text-xs font-semibold text-slate-400 flex-1">{formatDate(date)}</span>
-                    <button onClick={() => navigate(`/?date=${date}`)} className="text-slate-300 dark:text-slate-700 hover:text-blue-500 transition-colors mr-2" title="Edit this day">
+                    <button onClick={() => navigate(`/?date=${date}`)} className="text-slate-300 dark:text-slate-700 hover:text-cobalt-500 transition-colors mr-2" title="Edit this day">
                       <Pencil size={12} />
                     </button>
                   </div>
@@ -968,7 +969,7 @@ function LiftingChart({ workouts }: { workouts: DayWorkout[] }) {
 
   if (sorted.length < 2) {
     return (
-      <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+      <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
         <ChartControls range={range} onRange={setRange} metric={metric} onMetric={setMetric} />
         <p className="text-xs text-slate-400 text-center py-6">Not enough sessions in this range.</p>
       </div>
@@ -1010,11 +1011,11 @@ function LiftingChart({ workouts }: { workouts: DayWorkout[] }) {
     : `${isUp ? '+' : ''}${delta} ${metric}`;
 
   return (
-    <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+    <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
       <ChartControls range={range} onRange={setRange} metric={metric} onMetric={setMetric} />
 
       <div className="flex items-baseline gap-2 mt-1 mb-2">
-        <span className={`text-sm font-bold ${isUp ? 'text-blue-400' : 'text-red-400'}`}>
+        <span className={`text-sm font-bold ${isUp ? 'text-cobalt-400' : 'text-red-400'}`}>
           {isUp ? '↑' : '↓'} {deltaStr}
         </span>
         <span className="text-xs text-slate-400">vs first session</span>
@@ -1058,7 +1059,7 @@ function ChartControls({
 }) {
   const pill = (active: boolean) =>
     `px-1.5 py-0.5 rounded text-[10px] font-semibold transition-colors ${
-      active ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-300'
+      active ? 'bg-cobalt-500 text-white' : 'text-slate-400 hover:text-slate-300'
     }`;
   return (
     <div className="flex items-center justify-between gap-2">
@@ -1112,10 +1113,10 @@ function ExpandableLiftingLog({ workouts, exerciseTarget, exerciseName, targetHi
   }
 
   return (
-    <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
-      <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-[#1E2D45] flex items-center justify-between">
+    <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+      <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-line flex items-center justify-between">
         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Recent Days — {exerciseName}</span>
-        <button onClick={exportCSV} className="text-xs text-slate-400 hover:text-blue-400 transition-colors font-medium">
+        <button onClick={exportCSV} className="text-xs text-slate-400 hover:text-cobalt-400 transition-colors font-medium">
           Export CSV ↓
         </button>
       </div>
@@ -1130,16 +1131,16 @@ function ExpandableLiftingLog({ workouts, exerciseTarget, exerciseName, targetHi
           ? [...new Set(w.sets.map(s => s.exerciseName).filter(Boolean))] as string[]
           : [];
         return (
-          <div key={w.date} className="border-b border-slate-100 dark:border-[#1E2D45] last:border-0">
+          <div key={w.date} className="border-b border-slate-100 dark:border-line last:border-0">
             <div className="flex items-stretch">
             <button
-              className="flex-1 flex items-center px-4 py-3 hover:bg-slate-50 dark:hover:bg-[#1C2537] transition-colors text-left"
+              className="flex-1 flex items-center px-4 py-3 hover:bg-slate-50 dark:hover:bg-ink-elevated transition-colors text-left"
               onClick={() => setExpandedDate(isExpanded ? null : w.date)}
             >
               <span className="flex-1 min-w-0">
                 <span className="text-slate-500 dark:text-slate-400 text-sm block">{formatDate(w.date)}</span>
                 {exerciseNames.length > 0 && (
-                  <span className="text-blue-500 text-xs truncate block">{exerciseNames.join(', ')}</span>
+                  <span className="text-cobalt-500 text-xs truncate block">{exerciseNames.join(', ')}</span>
                 )}
               </span>
               {!isAllView && (
@@ -1153,7 +1154,7 @@ function ExpandableLiftingLog({ workouts, exerciseTarget, exerciseName, targetHi
               </span>
               <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`} />
             </button>
-            <button onClick={() => navigate(`/?date=${w.date}`)} className="px-3 text-slate-300 dark:text-slate-700 hover:text-blue-500 transition-colors flex-shrink-0" title="Edit this day">
+            <button onClick={() => navigate(`/?date=${w.date}`)} className="px-3 text-slate-300 dark:text-slate-700 hover:text-cobalt-500 transition-colors flex-shrink-0" title="Edit this day">
               <Pencil size={12} />
             </button>
             </div>
@@ -1178,9 +1179,9 @@ function ExpandableLiftingLog({ workouts, exerciseTarget, exerciseName, targetHi
                   }
                   return groups.map(g =>
                     g.kind === 'single' ? (
-                      <div key={g.set.id} className="flex items-center bg-slate-100 dark:bg-[#1C2537] rounded-xl px-3 py-2 gap-2">
+                      <div key={g.set.id} className="flex items-center bg-slate-100 dark:bg-ink-elevated rounded-xl px-3 py-2 gap-2">
                         <span className="text-slate-400 text-xs font-semibold uppercase w-10 flex-shrink-0">Set {g.n}</span>
-                        {isAllView && g.set.exerciseName && <span className="text-blue-500 text-xs font-semibold flex-shrink-0">{g.set.exerciseName}</span>}
+                        {isAllView && g.set.exerciseName && <span className="text-cobalt-500 text-xs font-semibold flex-shrink-0">{g.set.exerciseName}</span>}
                         <span className="text-slate-900 dark:text-white font-semibold text-sm">{g.set.weight} kg × {g.set.reps}</span>
                         <span className="ml-auto text-slate-400 text-xs flex-shrink-0">1RM ≈ {epley1RM(g.set.weight, g.set.reps)} kg</span>
                         {onDeleteSet && (
@@ -1195,9 +1196,9 @@ function ExpandableLiftingLog({ workouts, exerciseTarget, exerciseName, targetHi
                           <span className="text-xs font-bold text-violet-500 uppercase tracking-wider">Superset</span>
                         </div>
                         {g.items.map(({ set: s, n: sn }) => (
-                          <div key={s.id} className="flex items-center bg-slate-100 dark:bg-[#1C2537] px-3 py-2 gap-2 mt-px">
+                          <div key={s.id} className="flex items-center bg-slate-100 dark:bg-ink-elevated px-3 py-2 gap-2 mt-px">
                             <span className="text-slate-400 text-xs font-semibold uppercase w-10 flex-shrink-0">Set {sn}</span>
-                            {isAllView && s.exerciseName && <span className="text-blue-500 text-xs font-semibold flex-shrink-0">{s.exerciseName}</span>}
+                            {isAllView && s.exerciseName && <span className="text-cobalt-500 text-xs font-semibold flex-shrink-0">{s.exerciseName}</span>}
                             <span className="text-slate-900 dark:text-white font-semibold text-sm">{s.weight} kg × {s.reps}</span>
                             <span className="ml-auto text-slate-400 text-xs flex-shrink-0">1RM ≈ {epley1RM(s.weight, s.reps)} kg</span>
                           </div>
@@ -1253,12 +1254,12 @@ function WeightTab({
   return (
     <div className="space-y-4">
       {/* Unit Selector */}
-      <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+      <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-3">Unit</span>
         <div className="grid grid-cols-3 gap-2">
           {(['kg', 'lbs', 'stone'] as WeightUnit[]).map(u => (
             <button key={u} onClick={() => onUnitChange(u)}
-              className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${unit === u ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-[#253347]'}`}>
+              className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${unit === u ? 'bg-cobalt-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-ink-elevated'}`}>
               {u}
             </button>
           ))}
@@ -1267,10 +1268,10 @@ function WeightTab({
 
       {/* Goal Card */}
       {weightGoal ? (
-        <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 space-y-3 shadow-sm border border-slate-200 dark:border-transparent">
+        <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 space-y-3 shadow-sm border border-slate-200 dark:border-transparent">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Goal</span>
-            <button onClick={onRequestGoalForm} className="text-blue-500 text-xs font-semibold hover:text-blue-400">Edit</button>
+            <button onClick={onRequestGoalForm} className="text-cobalt-500 text-xs font-semibold hover:text-cobalt-400">Edit</button>
           </div>
           <div className="grid grid-cols-3 gap-3 text-center">
             <div>
@@ -1292,7 +1293,7 @@ function WeightTab({
                 <span>Change so far</span>
                 <span>{progressInfo.changeSoFar > 0 ? '+' : ''}{progressInfo.changeSoFar} {unit} of {progressInfo.changeNeeded > 0 ? '+' : ''}{progressInfo.changeNeeded} {unit} needed</span>
               </div>
-              <div className="h-2 bg-slate-100 dark:bg-[#1C2537] rounded-full overflow-hidden">
+              <div className="h-2 bg-slate-100 dark:bg-ink-elevated rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${progressInfo.onTrack ? 'bg-green-500' : 'bg-orange-500'}`}
                   style={{ width: `${Math.max(0, Math.min(100, Math.abs(progressInfo.pct)))}%` }}
@@ -1308,10 +1309,10 @@ function WeightTab({
           )}
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 text-center shadow-sm border border-slate-200 dark:border-transparent">
+        <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 text-center shadow-sm border border-slate-200 dark:border-transparent">
           <p className="text-slate-400 text-sm mb-3">No weight goal set.</p>
           <button onClick={onRequestGoalForm}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm transition-colors">
+            className="w-full py-2.5 bg-cobalt-500 hover:bg-cobalt-600 text-white font-semibold rounded-xl text-sm transition-colors">
             Set Goal
           </button>
         </div>
@@ -1324,8 +1325,8 @@ function WeightTab({
 
       {/* History */}
       {weightEntries.length > 0 && (
-        <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
-          <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-[#1E2D45]">
+        <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-line">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">History</span>
           </div>
           {[...weightEntries].reverse().map((entry, i, arr) => {
@@ -1333,7 +1334,7 @@ function WeightTab({
             const deltaKg = prev ? +(entry.kg - prev.kg).toFixed(2) : null;
             const deltaDisplay = deltaKg !== null ? kgToUnit(Math.abs(deltaKg), unit) * Math.sign(deltaKg) : null;
             return (
-              <div key={entry.date} className="flex items-center px-4 py-3 border-b border-slate-100 dark:border-[#1E2D45] last:border-0">
+              <div key={entry.date} className="flex items-center px-4 py-3 border-b border-slate-100 dark:border-line last:border-0">
                 <span className="text-slate-500 dark:text-slate-400 text-sm flex-1">{formatDate(entry.date)}</span>
                 {deltaDisplay !== null && (
                   <span className={`text-xs font-semibold mr-3 ${deltaDisplay < 0 ? 'text-green-500' : deltaDisplay > 0 ? 'text-red-400' : 'text-slate-400'}`}>
@@ -1341,7 +1342,7 @@ function WeightTab({
                   </span>
                 )}
                 <span className="text-slate-900 dark:text-white font-bold text-sm mr-3">{kgToUnit(entry.kg, unit)} {unit}</span>
-                <button onClick={() => navigate(`/?date=${entry.date}`)} className="text-slate-300 dark:text-slate-700 hover:text-blue-500 transition-colors mr-2" title="Edit this day">
+                <button onClick={() => navigate(`/?date=${entry.date}`)} className="text-slate-300 dark:text-slate-700 hover:text-cobalt-500 transition-colors mr-2" title="Edit this day">
                   <Pencil size={12} />
                 </button>
                 <button onClick={() => onDeleteEntry(entry.date)} className="text-slate-400 hover:text-red-400 transition-colors">
@@ -1407,7 +1408,7 @@ function WeightChart({ entries, goalKg, unit, today }: {
   }
 
   return (
-    <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+    <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
       <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-3">Weight Over Time</span>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 140 }}>
         {yLabels.map((val, i) => (
@@ -1472,12 +1473,12 @@ function WeightGoalForm({
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-end" onClick={onClose}>
-      <div className="bg-slate-50 dark:bg-[#0A0F1E] w-full max-w-lg mx-auto rounded-t-3xl p-5 space-y-4"
+      <div className="bg-slate-50 dark:bg-ink w-full max-w-lg mx-auto rounded-t-3xl p-5 space-y-4"
         style={{ maxHeight: '90vh', overflowY: 'auto' }}
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h2 className="text-slate-900 dark:text-white font-extrabold text-xl">Weight Goal</h2>
-          <button onClick={onClose} className="text-blue-500 font-semibold">Cancel</button>
+          <button onClick={onClose} className="text-cobalt-500 font-semibold">Cancel</button>
         </div>
 
         <div>
@@ -1501,11 +1502,11 @@ function WeightGoalForm({
         <div>
           <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Target Date</label>
           <input type="date" value={targetDate} onChange={e => setTargetDate(e.target.value)} min={today}
-            className="w-full bg-white dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border border-slate-200 dark:border-transparent" />
+            className="w-full bg-white dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500 border border-slate-200 dark:border-transparent" />
         </div>
 
         <button onClick={handleSave}
-          className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors">
+          className="w-full py-3.5 bg-cobalt-500 hover:bg-cobalt-600 text-white font-bold rounded-xl transition-colors">
           Save Goal
         </button>
       </div>
@@ -1535,17 +1536,17 @@ function DaySheet({
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-end justify-center" onClick={onClose}>
-      <div className="bg-slate-50 dark:bg-[#0A0F1E] w-full max-w-lg rounded-t-3xl flex flex-col" style={{ maxHeight: '85vh' }}
+      <div className="bg-slate-50 dark:bg-ink w-full max-w-lg rounded-t-3xl flex flex-col" style={{ maxHeight: '85vh' }}
         onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-200 dark:border-[#1E2D45] flex-shrink-0">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-200 dark:border-line flex-shrink-0">
           <div className="text-slate-900 dark:text-white font-extrabold text-xl">{formatDate(date)}</div>
-          <button onClick={onClose} className="text-blue-500 font-semibold hover:text-blue-400">Done</button>
+          <button onClick={onClose} className="text-cobalt-500 font-semibold hover:text-cobalt-400">Done</button>
         </div>
         <div className="overflow-y-auto flex-1 p-4 space-y-3">
           {progressTab === 'lifting' && (workout ? (
             <>
               {workout.sets.map((s, i) => (
-                <div key={s.id} className="flex items-center bg-white dark:bg-[#1C2537] rounded-xl px-4 py-2.5 border border-slate-200 dark:border-transparent">
+                <div key={s.id} className="flex items-center bg-white dark:bg-ink-elevated rounded-xl px-4 py-2.5 border border-slate-200 dark:border-transparent">
                   <span className="text-slate-400 text-xs font-semibold uppercase w-12">Set {i + 1}</span>
                   <span className="flex-1 text-slate-900 dark:text-white font-bold">{s.weight} kg × {s.reps}</span>
                   <span className="text-slate-400 text-xs">1RM ≈ {epley1RM(s.weight, s.reps)} kg</span>
@@ -1563,7 +1564,7 @@ function DaySheet({
           {progressTab === 'running' && (dayRuns.length > 0 ? (
             <>
               {dayRuns.map(r => (
-                <div key={r.id} className="flex items-center bg-white dark:bg-[#1C2537] rounded-xl px-4 py-2.5 border border-slate-200 dark:border-transparent">
+                <div key={r.id} className="flex items-center bg-white dark:bg-ink-elevated rounded-xl px-4 py-2.5 border border-slate-200 dark:border-transparent">
                   <span className="text-orange-500 font-bold flex-1">{r.distanceKm} km</span>
                 </div>
               ))}
@@ -1581,7 +1582,7 @@ function DaySheet({
           {progressTab === 'gratitude' && (gratitudeEntries.length > 0 ? (
             <div className="space-y-2">
               {gratitudeEntries.map(e => (
-                <p key={e.id} className="text-slate-900 dark:text-white text-sm leading-relaxed bg-white dark:bg-[#1C2537] rounded-xl px-4 py-3 border border-slate-200 dark:border-transparent">{e.text}</p>
+                <p key={e.id} className="text-slate-900 dark:text-white text-sm leading-relaxed bg-white dark:bg-ink-elevated rounded-xl px-4 py-3 border border-slate-200 dark:border-transparent">{e.text}</p>
               ))}
             </div>
           ) : <p className="text-slate-400 text-sm">No gratitude on this day.</p>)}
@@ -1597,7 +1598,7 @@ function HabitDayRow({ date, habit, entry }: { date: string; habit: Habit; entry
   const navigate = useNavigate();
   const done = habitCompletion(habit, entry) === 1;
   return (
-    <div className="flex items-center px-4 py-3 border-b border-slate-100 dark:border-[#1E2D45] last:border-0">
+    <div className="flex items-center px-4 py-3 border-b border-slate-100 dark:border-line last:border-0">
       <span className="text-slate-500 dark:text-slate-400 text-sm flex-1">{formatDate(date)}</span>
       {habit.type === undefined && (() => {
         const c = entry.completion ?? 'none';
@@ -1614,7 +1615,7 @@ function HabitDayRow({ date, habit, entry }: { date: string; habit: Habit; entry
           <div className="flex items-center gap-3">
             <div className="flex gap-1.5">
               {cps.map(cp => (
-                <span key={cp.id} className={`text-xs ${entry.checkpoints?.[cp.id] ? 'text-blue-500' : 'text-slate-300 dark:text-slate-700'}`}>
+                <span key={cp.id} className={`text-xs ${entry.checkpoints?.[cp.id] ? 'text-cobalt-500' : 'text-slate-300 dark:text-slate-700'}`}>
                   {cp.label}
                 </span>
               ))}
@@ -1629,7 +1630,7 @@ function HabitDayRow({ date, habit, entry }: { date: string; habit: Habit; entry
       {habit.type === 'numeric' && (
         <span className="text-slate-900 dark:text-white font-bold text-sm">{entry.value ?? 0}{habit.unit ? ` ${habit.unit}` : ''}</span>
       )}
-      <button onClick={() => navigate(`/?date=${date}`)} className="ml-2 text-slate-300 dark:text-slate-700 hover:text-blue-500 transition-colors flex-shrink-0" title="Edit this day">
+      <button onClick={() => navigate(`/?date=${date}`)} className="ml-2 text-slate-300 dark:text-slate-700 hover:text-cobalt-500 transition-colors flex-shrink-0" title="Edit this day">
         <Pencil size={12} />
       </button>
     </div>
@@ -1649,7 +1650,7 @@ function HabitEntryDisplay({ habit, entry }: { habit: Habit; entry: HabitEntry |
         <div className={`px-4 py-2.5 rounded-xl text-sm font-semibold text-center ${
           c === 'full' ? 'bg-green-600 text-white' :
           c === 'micro' ? 'bg-yellow-500 text-white' :
-          'bg-slate-100 dark:bg-[#1C2537] text-slate-400'
+          'bg-slate-100 dark:bg-ink-elevated text-slate-400'
         }`}>
           {c === 'full' ? `✓ ${name}` : c === 'micro' ? `~ ${habit.microHabit ?? 'Micro version'}` : 'Not completed'}
         </div>
@@ -1672,7 +1673,7 @@ function HabitEntryDisplay({ habit, entry }: { habit: Habit; entry: HabitEntry |
         {cps.map(cp => {
           const done = entry.checkpoints?.[cp.id] ?? false;
           return (
-            <div key={cp.id} className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold text-center ${done ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-400'}`}>
+            <div key={cp.id} className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold text-center ${done ? 'bg-cobalt-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-400'}`}>
               {cp.label}
             </div>
           );
@@ -1682,14 +1683,14 @@ function HabitEntryDisplay({ habit, entry }: { habit: Habit; entry: HabitEntry |
   }
   if (habit.type === 'boolean') {
     return (
-      <div className={`px-4 py-2.5 rounded-xl text-sm font-semibold text-center ${entry.done ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-[#1C2537] text-slate-400'}`}>
+      <div className={`px-4 py-2.5 rounded-xl text-sm font-semibold text-center ${entry.done ? 'bg-cobalt-500 text-white' : 'bg-slate-100 dark:bg-ink-elevated text-slate-400'}`}>
         {entry.done ? 'Done' : 'Not done'}
       </div>
     );
   }
   if (habit.type === 'numeric') {
     return (
-      <div className="bg-slate-100 dark:bg-[#1C2537] rounded-xl px-4 py-2.5 text-sm">
+      <div className="bg-slate-100 dark:bg-ink-elevated rounded-xl px-4 py-2.5 text-sm">
         <span className="text-slate-900 dark:text-white font-bold">{entry.value ?? 0}</span>
         {habit.unit && <span className="text-slate-400 ml-1">{habit.unit}</span>}
       </div>
@@ -1726,7 +1727,7 @@ function BaseCalendar({
   const monthLabel = new Date(viewYear, viewMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+    <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
       <div className="flex items-center justify-between mb-4">
         <button onClick={prevMonth} className="text-slate-400 hover:text-slate-600 dark:hover:text-white w-8 h-8 flex items-center justify-center text-xl">‹</button>
         <span className="text-slate-900 dark:text-white font-bold text-sm">{monthLabel}</span>
@@ -1744,7 +1745,7 @@ function BaseCalendar({
           const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           return (
             <button key={day} onClick={() => onDayPress(dateStr)}
-              className={`aspect-square flex items-center justify-center rounded-lg text-xs font-semibold transition-all active:scale-95 hover:opacity-80 ${cellStyle(dateStr)} ${dateStr === todayStr ? 'ring-2 ring-blue-500' : ''}`}>
+              className={`aspect-square flex items-center justify-center rounded-lg text-xs font-semibold transition-all active:scale-95 hover:opacity-80 ${cellStyle(dateStr)} ${dateStr === todayStr ? 'ring-2 ring-cobalt-500' : ''}`}>
               {day}
             </button>
           );
@@ -1759,7 +1760,7 @@ function BaseCalendar({
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
+    <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-transparent">
       <div className="text-2xl font-extrabold text-slate-900 dark:text-white">{value}</div>
       <div className="text-xs text-slate-400 mt-0.5">{label}</div>
     </div>

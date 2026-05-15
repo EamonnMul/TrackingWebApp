@@ -28,7 +28,7 @@ interface SortableTabProps {
   activeClass?: string;
 }
 
-function SortableTab({ tab, isActive, dot, onClick, textSize = 'text-xs', activeClass = 'bg-blue-600 text-white' }: SortableTabProps) {
+function SortableTab({ tab, isActive, dot, onClick, textSize = 'text-xs', activeClass = 'bg-cobalt-500 text-white' }: SortableTabProps) {
   const {
     attributes,
     listeners,
@@ -106,7 +106,7 @@ export function SortableTabBar({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={tabs.map(t => t.id)} strategy={horizontalListSortingStrategy}>
-        <div className="flex bg-white dark:bg-[#111827] rounded-2xl p-1 gap-1 shadow-sm border border-slate-200 dark:border-transparent">
+        <div className="flex bg-white dark:bg-ink-surface rounded-2xl p-1 gap-1 shadow-sm border border-slate-200 dark:border-transparent">
           {tabs.map(tab => (
             <SortableTab
               key={tab.id}

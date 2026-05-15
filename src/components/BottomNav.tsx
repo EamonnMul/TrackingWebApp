@@ -7,18 +7,25 @@ import {
   SortableContext, horizontalListSortingStrategy, useSortable, arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Home, Dumbbell, LineChart, LucideIcon } from 'lucide-react';
 import { getAllTodos, getTodayString } from '../utils/storage';
 
-// ─── Tab order persistence ────────────────────────────────────────────────────
+// ─── Tab definitions ─────────────────────────────────────────────────────────
 
-const DEFAULT_TABS = [
-  { id: '/today', label: 'Home' },
-  { id: '/', label: 'Log' },
-  { id: '/progress', label: 'Progress' },
+interface Tab {
+  id: string;
+  label: string;
+  Icon: LucideIcon;
+}
+
+const DEFAULT_TABS: Tab[] = [
+  { id: '/today',    label: 'Home',     Icon: Home },
+  { id: '/',         label: 'Log',      Icon: Dumbbell },
+  { id: '/progress', label: 'Progress', Icon: LineChart },
 ];
-const NAV_ORDER_KEY = 'bottomNavOrder_v4';
+const NAV_ORDER_KEY = 'bottomNavOrder_v5';
 
-function loadTabOrder() {
+function loadTabOrder(): Tab[] {
   try {
     const stored = localStorage.getItem(NAV_ORDER_KEY);
     if (stored) {
@@ -31,11 +38,12 @@ function loadTabOrder() {
   return DEFAULT_TABS;
 }
 
-// ─── Single sortable tab ──────────────────────────────────────────────────────
+// ─── Single sortable tab ─────────────────────────────────────────────────────
 
-function NavTab({ tab, active, hasDot }: { tab: { id: string; label: string }; active: boolean; hasDot: boolean }) {
+function NavTab({ tab, active, hasDot }: { tab: Tab; active: boolean; hasDot: boolean }) {
   const navigate = useNavigate();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: tab.id });
+  const { Icon } = tab;
 
   return (
     <div
@@ -47,36 +55,48 @@ function NavTab({ tab, active, hasDot }: { tab: { id: string; label: string }; a
     >
       <button
         onClick={() => navigate(tab.id)}
-        className={`w-full flex flex-col items-center justify-center py-4 gap-0.5 transition-colors select-none touch-none ${
-          active ? 'text-blue-500' : 'text-slate-400 dark:text-slate-500'
-        }`}
+        className="w-full flex flex-col items-center justify-center pt-2 pb-2 gap-1
+                   select-none touch-none transition-colors"
       >
-        <span className={`text-xs font-bold tracking-wide ${active ? 'text-blue-500' : ''}`}>
+        <span
+          className={`inline-flex items-center justify-center w-14 h-8 rounded-full transition-all
+            ${active
+              ? 'bg-cobalt-500/15 border border-cobalt-500/40 text-cobalt-400'
+              : 'text-slate-500 dark:text-slate-500'
+            }`}
+        >
+          <Icon size={active ? 19 : 18} strokeWidth={active ? 2.4 : 2} />
+        </span>
+        <span
+          className={`text-[10px] font-bold tracking-wider transition-colors
+            ${active ? 'text-cobalt-500 dark:text-cobalt-400' : 'text-slate-500 dark:text-slate-500'}
+          `}
+        >
           {tab.label}
         </span>
-        {/* Active indicator dot */}
-        {active && <span className="w-1 h-1 rounded-full bg-blue-500" />}
       </button>
-      {/* Pending task hue — subtle violet glow behind label */}
+      {/* Pending-task indicator */}
       {hasDot && !active && (
-        <span className="absolute top-3 right-[calc(50%-10px)] w-1.5 h-1.5 rounded-full bg-violet-500 pointer-events-none" />
+        <span
+          className="absolute top-2 right-[calc(50%-12px)] w-1.5 h-1.5 rounded-full
+                     bg-fire-600 shadow-glow-fire pointer-events-none"
+        />
       )}
     </div>
   );
 }
 
-// ─── Nav ──────────────────────────────────────────────────────────────────────
+// ─── Nav ─────────────────────────────────────────────────────────────────────
 
 export default function BottomNav() {
   const location = useLocation();
-  const [tabs, setTabs] = useState(loadTabOrder);
+  const [tabs, setTabs] = useState<Tab[]>(loadTabOrder);
   const [pendingToday, setPendingToday] = useState(0);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   );
 
-  // Fetch pending tasks count once on mount
   useEffect(() => {
     const today = getTodayString();
     getAllTodos().then(all => {
@@ -97,10 +117,13 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 bg-white dark:bg-[#111827] border-t border-slate-200 dark:border-[#1E2D45] z-40"
+      className="fixed bottom-0 left-0 right-0 z-40
+                 bg-white/95 dark:bg-ink-surface/95
+                 backdrop-blur-lg
+                 border-t border-slate-200 dark:border-line"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="max-w-lg mx-auto flex">
+      <div className="max-w-lg mx-auto flex px-2 pt-1">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={tabs.map(t => t.id)} strategy={horizontalListSortingStrategy}>
             {tabs.map(tab => (

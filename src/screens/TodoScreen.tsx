@@ -226,7 +226,7 @@ export default function TodoScreen() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-cobalt-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -238,25 +238,26 @@ export default function TodoScreen() {
     <div className="space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Tasks</h1>
-        <p className="text-slate-400 text-sm mt-0.5">
+        <p className="screen-eyebrow text-cobalt-500">Inbox</p>
+        <h1 className="screen-title">Tasks</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
           {view === 'myDay' ? formatDate(selectedDate) : `${todos.filter(t => !t.done).length} remaining`}
         </p>
       </div>
 
       {/* View Tabs */}
-      <div className="flex bg-white dark:bg-[#111827] rounded-2xl p-1 gap-1 shadow-sm border border-slate-200 dark:border-transparent">
+      <div className="flex bg-white dark:bg-ink-surface rounded-2xl p-1 gap-1 shadow-sm border border-slate-200 dark:border-transparent">
         {([
           { id: 'myDay', label: 'My Day', icon: <Sun size={12} /> },
           { id: 'all', label: 'All Tasks', icon: null },
         ] as { id: TodoView; label: string; icon: React.ReactNode }[]).map(tab => (
           <button key={tab.id} onClick={() => setView(tab.id)}
             className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 ${
-              view === tab.id ? 'bg-blue-600 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+              view === tab.id ? 'bg-cobalt-500 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
             }`}>
             {tab.icon}{tab.label}
             {tab.id === 'myDay' && todayPendingCount > 0 && view !== 'myDay' && (
-              <span className="bg-blue-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+              <span className="bg-cobalt-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
                 {todayPendingCount}
               </span>
             )}
@@ -268,19 +269,19 @@ export default function TodoScreen() {
       {view === 'all' && todayPendingCount > 0 && (
         <button
           onClick={() => setView('myDay')}
-          className="w-full flex items-center gap-2 px-3.5 py-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/40 rounded-xl text-left"
+          className="w-full flex items-center gap-2 px-3.5 py-2.5 bg-cobalt-500/10 dark:bg-cobalt-500/15 border border-cobalt-500/30 dark:border-cobalt-500/40 rounded-xl text-left"
         >
-          <Sun size={13} className="text-blue-500 flex-shrink-0" />
-          <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+          <Sun size={13} className="text-cobalt-500 flex-shrink-0" />
+          <span className="text-xs text-cobalt-500 dark:text-cobalt-400 font-medium">
             {todayPendingCount} task{todayPendingCount !== 1 ? 's' : ''} still to do today
           </span>
-          <span className="ml-auto text-xs text-blue-400">View →</span>
+          <span className="ml-auto text-xs text-cobalt-400">View →</span>
         </button>
       )}
 
       {/* Date navigator — My Day only */}
       {view === 'myDay' && (
-        <div className="flex items-center bg-white dark:bg-[#111827] rounded-2xl shadow-sm border border-slate-200 dark:border-transparent">
+        <div className="flex items-center bg-white dark:bg-ink-surface rounded-2xl shadow-sm border border-slate-200 dark:border-transparent">
           <button
             onClick={() => {
               const d = new Date(selectedDate);
@@ -294,7 +295,7 @@ export default function TodoScreen() {
             {selectedDate !== today && (
               <button
                 onClick={() => setSelectedDate(today)}
-                className="block mx-auto text-xs text-blue-500 hover:text-blue-400 mt-0.5"
+                className="block mx-auto text-xs text-cobalt-500 hover:text-cobalt-400 mt-0.5"
               >Back to today</button>
             )}
           </div>
@@ -317,10 +318,10 @@ export default function TodoScreen() {
           onChange={e => setNewTitle(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
           placeholder="Add a task…"
-          className="flex-1 bg-white dark:bg-[#111827] text-slate-900 dark:text-white rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600 border border-slate-200 dark:border-transparent"
+          className="flex-1 bg-white dark:bg-ink-surface text-slate-900 dark:text-white rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-400 dark:placeholder:text-slate-600 border border-slate-200 dark:border-transparent"
         />
         <button onClick={handleAdd}
-          className="w-12 h-12 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white rounded-2xl flex items-center justify-center transition-all">
+          className="w-12 h-12 bg-cobalt-500 hover:bg-cobalt-600 active:scale-95 text-white rounded-2xl flex items-center justify-center transition-all">
           <Plus size={20} />
         </button>
       </div>
@@ -336,7 +337,7 @@ export default function TodoScreen() {
 
       {/* Incomplete tasks */}
       {incompleteTodos.length > 0 && (
-        <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+        <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
           {incompleteTodos.map((todo, idx) => (
             <TodoItem
               key={todo.id}
@@ -372,8 +373,8 @@ export default function TodoScreen() {
 
       {/* Completed tasks */}
       {completedTodos.length > 0 && (
-        <div className="bg-white dark:bg-[#111827] rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
-          <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-[#1E2D45]">
+        <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-transparent">
+          <div className="px-4 pt-3 pb-2 border-b border-slate-100 dark:border-line">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Completed ({completedTodos.length})
             </span>
@@ -441,13 +442,13 @@ function TodoItem({
   const isOverdue = todo.dueDate && todo.dueDate < today && !todo.done;
 
   return (
-    <div className="border-b border-slate-100 dark:border-[#1E2D45] last:border-0">
+    <div className="border-b border-slate-100 dark:border-line last:border-0">
       {/* Main row */}
       <div className="flex items-center px-4 py-3 gap-3">
         {/* Checkbox */}
         <button onClick={onToggle}
           className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-            todo.done ? 'bg-blue-600 border-blue-600' : 'border-slate-600 hover:border-blue-500'
+            todo.done ? 'bg-cobalt-500 border-cobalt-500' : 'border-slate-600 hover:border-cobalt-500'
           }`}>
           {todo.done && <div className="w-2 h-2 rounded-full bg-white" />}
         </button>
@@ -483,7 +484,7 @@ function TodoItem({
                 <span className="text-xs text-slate-600">My Day</span>
               )}
               {todo.recurrence && (
-                <span className="text-[10px] text-blue-400 flex items-center gap-0.5">
+                <span className="text-[10px] text-cobalt-400 flex items-center gap-0.5">
                   <Repeat2 size={9} /> {todo.recurrence.type}
                 </span>
               )}
@@ -499,7 +500,7 @@ function TodoItem({
 
       {/* Expanded panel */}
       {isExpanded && (
-        <div className="px-4 pb-4 space-y-3 border-t border-slate-100 dark:border-[#1E2D45] pt-3">
+        <div className="px-4 pb-4 space-y-3 border-t border-slate-100 dark:border-line pt-3">
           {/* Notes */}
           <textarea
             value={notesValue}
@@ -507,7 +508,7 @@ function TodoItem({
             onBlur={() => onUpdate({ notes: notesValue.trim() || undefined })}
             placeholder="Add notes…"
             rows={2}
-            className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-600"
+            className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-cobalt-500 placeholder:text-slate-600"
           />
 
           {/* Due date + My Day */}
@@ -517,14 +518,14 @@ function TodoItem({
               <div className="relative">
                 <input type="date" value={todo.dueDate ?? ''}
                   onChange={e => onUpdate({ dueDate: e.target.value || undefined })}
-                  className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500" />
               </div>
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">Priority</label>
               <select value={todo.priority ?? ''}
                 onChange={e => onUpdate({ priority: (e.target.value as Todo['priority']) || undefined })}
-                className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500">
                 <option value="">None</option>
                 <option value="high">🔴 High</option>
                 <option value="medium">🟡 Medium</option>
@@ -540,7 +541,7 @@ function TodoItem({
               <span className="text-slate-400 text-sm">Add to My Day</span>
             </div>
             <button onClick={() => onUpdate({ myDay: !todo.myDay })}
-              className={`w-10 h-5 rounded-full transition-colors relative flex-shrink-0 ${todo.myDay ? 'bg-blue-600' : 'bg-slate-700'}`}>
+              className={`w-10 h-5 rounded-full transition-colors relative flex-shrink-0 ${todo.myDay ? 'bg-cobalt-500' : 'bg-slate-700'}`}>
               <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${todo.myDay ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </button>
           </div>
@@ -570,7 +571,7 @@ function TodoItem({
                   });
                 }
               }}
-              className="w-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500"
             >
               <option value="">Does not repeat</option>
               <option value="daily">Daily</option>
@@ -589,8 +590,8 @@ function TodoItem({
                     }}
                     className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors ${
                       (todo.recurrence?.daysOfWeek ?? []).includes(i)
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-100 dark:bg-[#1C2537] text-slate-400'
+                        ? 'bg-cobalt-500 text-white'
+                        : 'bg-slate-100 dark:bg-ink-elevated text-slate-400'
                     }`}
                   >{d}</button>
                 ))}
@@ -603,7 +604,7 @@ function TodoItem({
                 <input type="number" min={1} max={28}
                   value={todo.recurrence.dayOfMonth ?? 1}
                   onChange={e => onUpdate({ recurrence: { ...todo.recurrence!, dayOfMonth: Math.min(28, Math.max(1, +e.target.value)) } })}
-                  className="w-14 bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-14 bg-slate-100 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-cobalt-500"
                 />
                 <span className="text-xs text-slate-400">of each month</span>
               </div>
@@ -620,13 +621,13 @@ function TodoItem({
           {/* Convert to habit */}
           {!todo.sourceHabitId && !todo.done && (
             <button onClick={onConvertToHabit}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-400 hover:border-blue-400 hover:text-blue-400 transition-colors">
+              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-400 hover:border-cobalt-400 hover:text-cobalt-400 transition-colors">
               ↻ Convert to habit
             </button>
           )}
 
           {/* Reorder + Delete */}
-          <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-[#1E2D45]">
+          <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-line">
             <button onClick={onMoveUp} disabled={isFirst}
               className="text-slate-600 hover:text-slate-300 disabled:opacity-30 transition-colors text-lg px-2">↑</button>
             <button onClick={onMoveDown} disabled={isLast}

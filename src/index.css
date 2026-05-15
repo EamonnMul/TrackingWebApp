@@ -2,32 +2,185 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Base ────────────────────────────────────────────────────────────────── */
+
 @layer base {
   html, body, #root {
     background-color: #f8fafc;
     min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
   html.dark, html.dark body, html.dark #root {
-    background-color: #0A0F1E;
+    background-color: #070B14;
+  }
+  body {
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto,
+      'Helvetica Neue', sans-serif;
+  }
+  /* Tabular nums by default on numeric elements */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
   }
 }
+
+/* ─── Components ──────────────────────────────────────────────────────────── */
 
 @layer components {
+
+  /* Surfaces ──────────────────────────────────────────────────────────────── */
+
+  .card {
+    @apply bg-white dark:bg-ink-surface rounded-2xl border border-slate-200 dark:border-line shadow-card;
+  }
+  .card-elevated {
+    @apply bg-white dark:bg-ink-elevated rounded-2xl border border-slate-200 dark:border-line shadow-elevated;
+  }
+  .card-inset {
+    @apply bg-slate-100 dark:bg-ink-inset rounded-xl border border-slate-200 dark:border-line;
+  }
+
+  /* Buttons ──────────────────────────────────────────────────────────────── */
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-white
+           bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98]
+           shadow-glow-cobalt transition-all
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:active:scale-100;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold
+           bg-slate-100 dark:bg-ink-inset text-slate-700 dark:text-slate-200
+           border border-slate-200 dark:border-line
+           hover:bg-slate-200 dark:hover:bg-ink-elevated active:scale-[0.98] transition-all
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl font-semibold
+           text-slate-500 dark:text-slate-400
+           hover:bg-slate-100 dark:hover:bg-ink-inset active:scale-[0.98] transition-all;
+  }
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-9 h-9 rounded-full
+           bg-slate-100 dark:bg-ink-inset text-slate-600 dark:text-slate-300
+           border border-slate-200 dark:border-line
+           hover:bg-slate-200 dark:hover:bg-ink-elevated active:scale-95 transition-all;
+  }
+
+  /* Inputs ──────────────────────────────────────────────────────────────── */
+
+  .input {
+    @apply w-full bg-white dark:bg-ink-inset text-slate-900 dark:text-white
+           rounded-xl px-4 py-2.5 text-sm
+           border border-slate-200 dark:border-line
+           placeholder:text-slate-400 dark:placeholder:text-slate-500
+           focus:outline-none focus:ring-2 focus:ring-cobalt-500/50 focus:border-cobalt-500/60
+           transition-colors;
+  }
+
+  /* Stepper buttons ─────────────────────────────────────────────────────── */
+
   .stepper-btn {
-    @apply w-11 h-11 rounded-full bg-slate-100 dark:bg-[#1C2537] text-slate-900 dark:text-white text-2xl font-bold flex items-center justify-center hover:bg-slate-200 dark:hover:bg-[#253347] active:scale-95 transition-all flex-shrink-0 select-none;
+    @apply w-11 h-11 rounded-full
+           bg-slate-100 dark:bg-ink-inset text-cobalt-500
+           border border-slate-200 dark:border-line
+           text-2xl font-bold flex items-center justify-center
+           hover:bg-cobalt-500/10 dark:hover:bg-cobalt-500/15 hover:border-cobalt-500/40
+           active:scale-95 transition-all flex-shrink-0 select-none;
+  }
+
+  /* Typography ──────────────────────────────────────────────────────────── */
+
+  .eyebrow {
+    @apply text-[10px] font-bold uppercase tracking-[0.14em]
+           text-slate-500 dark:text-slate-400;
+  }
+  .eyebrow-accent {
+    @apply eyebrow text-cobalt-500;
+  }
+  .eyebrow-fire {
+    @apply eyebrow text-fire-600;
+  }
+  .screen-title {
+    @apply text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white;
+  }
+  .screen-eyebrow {
+    @apply eyebrow mb-1.5;
+  }
+  .section-label {
+    @apply text-[11px] font-bold uppercase tracking-[0.12em]
+           text-slate-500 dark:text-slate-400 mb-2;
+  }
+
+  /* Numeric ─────────────────────────────────────────────────────────────── */
+
+  .numeric-display {
+    @apply tabular font-extrabold tracking-tight text-5xl leading-none;
+  }
+  .numeric-hero {
+    @apply tabular font-extrabold tracking-tight text-3xl leading-none;
+  }
+  .numeric-lg {
+    @apply tabular font-bold tracking-tight text-xl leading-none;
+  }
+  .numeric-md {
+    @apply tabular font-semibold text-base;
+  }
+
+  /* Chips / pills ───────────────────────────────────────────────────────── */
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full
+           text-[11px] font-bold;
+  }
+  .chip-accent {
+    @apply chip bg-cobalt-500/15 text-cobalt-400 border border-cobalt-500/30;
+  }
+  .chip-fire {
+    @apply chip bg-fire-600/15 text-fire-500 border border-fire-600/30;
+  }
+  .chip-success {
+    @apply chip bg-success-500/15 text-success-400 border border-success-500/30;
+  }
+  .chip-muted {
+    @apply chip bg-slate-100 dark:bg-ink-inset text-slate-500 dark:text-slate-400
+           border border-slate-200 dark:border-line;
+  }
+
+  /* Stat tile ───────────────────────────────────────────────────────────── */
+
+  .stat-tile {
+    @apply flex flex-col gap-1 p-3 rounded-xl
+           bg-white dark:bg-ink-surface
+           border border-slate-200 dark:border-line;
+  }
+  .stat-tile-accent {
+    @apply stat-tile bg-cobalt-500/10 dark:bg-cobalt-500/10 border-cobalt-500/30;
+  }
+
+  /* Progress bar ────────────────────────────────────────────────────────── */
+
+  .progress-track {
+    @apply h-2 w-full rounded-full bg-slate-200 dark:bg-ink-inset overflow-hidden
+           border border-slate-200 dark:border-line;
+  }
+  .progress-fill {
+    @apply h-full rounded-full bg-cobalt-500 transition-all;
+  }
+  .progress-fill-success {
+    @apply h-full rounded-full bg-success-500 transition-all;
   }
 }
 
-/* ─── Logging micro-animations ─────────────────────────────────────────────── */
+/* ─── Animations ─────────────────────────────────────────────────────────── */
 
-/* New item entrance: slides up + spring overshoot */
 @keyframes pop-in {
   0%   { opacity: 0; transform: scale(0.78) translateY(10px); }
   60%  { opacity: 1; transform: scale(1.05) translateY(-3px); }
   100% { opacity: 1; transform: scale(1)    translateY(0);    }
 }
-
-/* Button success: press → bounce + green ring pulse */
 @keyframes btn-bounce {
   0%   { transform: scale(1);    }
   18%  { transform: scale(0.93); }
@@ -35,12 +188,10 @@
   100% { transform: scale(1);    }
 }
 @keyframes btn-ring {
-  0%   { box-shadow: 0 0 0 0   rgba(34,197,94,0.55); }
-  65%  { box-shadow: 0 0 0 9px rgba(34,197,94,0);    }
-  100% { box-shadow: 0 0 0 0   rgba(34,197,94,0);    }
+  0%   { box-shadow: 0 0 0 0   rgba(31,203,107,0.55); }
+  65%  { box-shadow: 0 0 0 9px rgba(31,203,107,0);    }
+  100% { box-shadow: 0 0 0 0   rgba(31,203,107,0);    }
 }
-
-/* Habit card: subtle spring bump when toggled */
 @keyframes habit-bump {
   0%   { transform: scale(1);    }
   35%  { transform: scale(1.025); }
@@ -59,25 +210,21 @@
   animation: habit-bump 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* ─── Meditation breathing animation (4s in · 1s hold · 6s out = 11s cycle) ── */
-
+/* Meditation breathing animation */
 @keyframes breathe-cycle {
   0%, 100% {
     transform: scale(0.72);
     box-shadow: 0 0 28px 8px rgba(139, 92, 246, 0.18);
   }
-  /* end of inhale — 4/11 ≈ 36.36% */
   36.36% {
     transform: scale(1);
     box-shadow: 0 0 90px 36px rgba(139, 92, 246, 0.52);
   }
-  /* end of hold — 5/11 ≈ 45.45% */
   45.45% {
     transform: scale(1);
     box-shadow: 0 0 90px 36px rgba(139, 92, 246, 0.52);
   }
 }
-
 .breathe-circle {
   animation: breathe-cycle 11s ease-in-out infinite;
 }

@@ -79,7 +79,7 @@ export default function DailyCheckIn({ onDismiss }: { onDismiss: () => void }) {
       />
 
       {/* Card */}
-      <div className="relative w-full max-w-sm bg-white dark:bg-[#111827] rounded-3xl shadow-2xl p-6 animate-pop-in">
+      <div className="relative w-full max-w-sm bg-white dark:bg-ink-surface rounded-3xl shadow-2xl p-6 animate-pop-in">
 
         {/* Header */}
         <div className="mb-5">
@@ -91,14 +91,14 @@ export default function DailyCheckIn({ onDismiss }: { onDismiss: () => void }) {
         </div>
 
         {/* Date toggle */}
-        <div className="flex gap-2 mb-5 bg-slate-100 dark:bg-[#1C2537] rounded-xl p-1">
+        <div className="flex gap-2 mb-5 bg-slate-100 dark:bg-ink-elevated rounded-xl p-1">
           {(['today', 'yesterday'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setDateTab(tab)}
               className={`flex-1 py-1.5 rounded-lg text-sm font-semibold transition-all ${
                 dateTab === tab
-                  ? 'bg-white dark:bg-[#0A0F1E] text-slate-900 dark:text-white shadow-sm'
+                  ? 'bg-white dark:bg-ink text-slate-900 dark:text-white shadow-sm'
                   : 'text-slate-400 dark:text-slate-500'
               }`}
             >
@@ -117,7 +117,7 @@ export default function DailyCheckIn({ onDismiss }: { onDismiss: () => void }) {
             onChange={e => setGratitude(e.target.value)}
             placeholder="Something good, however small..."
             rows={2}
-            className="w-full bg-slate-50 dark:bg-[#1C2537] text-slate-900 dark:text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-sm resize-none outline-none border-2 border-transparent focus:border-violet-400 transition-colors"
+            className="w-full bg-slate-50 dark:bg-ink-elevated text-slate-900 dark:text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-sm resize-none outline-none border-2 border-transparent focus:border-violet-400 transition-colors"
           />
         </div>
 
@@ -131,7 +131,7 @@ export default function DailyCheckIn({ onDismiss }: { onDismiss: () => void }) {
             onChange={e => setTasks(e.target.value)}
             placeholder={"Finish report\nGym\nCall mum"}
             rows={3}
-            className="w-full bg-slate-50 dark:bg-[#1C2537] text-slate-900 dark:text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-sm resize-none outline-none border-2 border-transparent focus:border-violet-400 transition-colors"
+            className="w-full bg-slate-50 dark:bg-ink-elevated text-slate-900 dark:text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-sm resize-none outline-none border-2 border-transparent focus:border-violet-400 transition-colors"
           />
         </div>
 

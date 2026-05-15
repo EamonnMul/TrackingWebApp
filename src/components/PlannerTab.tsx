@@ -110,7 +110,7 @@ function ActiveWorkout({ plan, onFinish, onCancel }: {
         </div>
         <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-500 rounded-full transition-all"
+            className="h-full bg-cobalt-500 rounded-full transition-all"
             style={{ width: `${totalSets > 0 ? (doneCount / totalSets) * 100 : 0}%` }}
           />
         </div>
@@ -121,7 +121,7 @@ function ActiveWorkout({ plan, onFinish, onCancel }: {
         const exDone = exRows.filter(r => r.done).length;
         const open = expandedEx === ei;
         return (
-          <div key={ex.id} className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-transparent shadow-sm overflow-hidden">
+          <div key={ex.id} className="bg-white dark:bg-ink-surface rounded-2xl border border-slate-200 dark:border-transparent shadow-sm overflow-hidden">
             <button
               className="w-full flex items-center justify-between px-4 py-3"
               onClick={() => setExpandedEx(open ? null : ei)}
@@ -146,7 +146,7 @@ function ActiveWorkout({ plan, onFinish, onCancel }: {
                   <span>Weight (kg)</span><span>Reps</span><span></span><span></span>
                 </div>
                 {exRows.map(r => (
-                  <div key={r.setIdx} className={`grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-center rounded-xl px-2 py-1.5 transition-colors ${r.done ? 'bg-green-50 dark:bg-green-900/20' : 'bg-slate-50 dark:bg-[#1C2537]'}`}>
+                  <div key={r.setIdx} className={`grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-center rounded-xl px-2 py-1.5 transition-colors ${r.done ? 'bg-green-50 dark:bg-green-900/20' : 'bg-slate-50 dark:bg-ink-elevated'}`}>
                     <input
                       type="number"
                       value={r.weight}
@@ -184,7 +184,7 @@ function ActiveWorkout({ plan, onFinish, onCancel }: {
         <button
           onClick={handleFinish}
           disabled={saving || doneCount === 0}
-          className="flex-1 py-3 rounded-2xl text-sm font-bold bg-blue-600 hover:bg-blue-700 active:scale-95 text-white transition-all disabled:opacity-40 shadow-lg shadow-blue-500/20"
+          className="flex-1 py-3 rounded-2xl text-sm font-bold bg-cobalt-500 hover:bg-cobalt-600 active:scale-95 text-white transition-all disabled:opacity-40 shadow-lg shadow-glow-cobalt"
         >
           {saving ? 'Saving…' : `Finish Workout (${doneCount} sets) →`}
         </button>
@@ -262,7 +262,7 @@ function WorkoutBuilder({ initial, onSave, onCancel }: {
               <button
                 key={tpl.id}
                 onClick={() => loadTemplate(tpl.id)}
-                className="flex flex-col items-center gap-1 bg-white dark:bg-[#111827] rounded-2xl p-3 border border-slate-200 dark:border-transparent shadow-sm hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+                className="flex flex-col items-center gap-1 bg-white dark:bg-ink-surface rounded-2xl p-3 border border-slate-200 dark:border-transparent shadow-sm hover:border-cobalt-400 dark:hover:border-cobalt-500 transition-colors"
               >
                 <span className="text-sm font-bold text-slate-900 dark:text-white">{tpl.name}</span>
                 <span className="text-[10px] text-slate-400 text-center leading-tight">{tpl.description}</span>
@@ -282,7 +282,7 @@ function WorkoutBuilder({ initial, onSave, onCancel }: {
           value={name}
           onChange={e => setName(e.target.value)}
           placeholder="e.g. Pull Day A"
-          className="w-full bg-slate-50 dark:bg-[#1C2537] text-slate-900 dark:text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-sm outline-none border-2 border-transparent focus:border-blue-400 transition-colors"
+          className="w-full bg-slate-50 dark:bg-ink-elevated text-slate-900 dark:text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-sm outline-none border-2 border-transparent focus:border-cobalt-400 transition-colors"
         />
       </div>
 
@@ -293,7 +293,7 @@ function WorkoutBuilder({ initial, onSave, onCancel }: {
           type="date"
           value={date}
           onChange={e => setDate(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm outline-none border-2 border-transparent focus:border-blue-400 transition-colors"
+          className="w-full bg-slate-50 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm outline-none border-2 border-transparent focus:border-cobalt-400 transition-colors"
         />
       </div>
 
@@ -302,14 +302,14 @@ function WorkoutBuilder({ initial, onSave, onCancel }: {
         <label className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.1em] block mb-2">Exercises</label>
         <div className="space-y-3">
           {exercises.map((ex, idx) => (
-            <div key={ex.id} className="bg-white dark:bg-[#111827] rounded-2xl p-4 border border-slate-200 dark:border-transparent shadow-sm">
+            <div key={ex.id} className="bg-white dark:bg-ink-surface rounded-2xl p-4 border border-slate-200 dark:border-transparent shadow-sm">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-[10px] font-bold text-slate-400 w-5 text-center">{idx + 1}</span>
                 <input
                   value={ex.name}
                   onChange={e => updateEx(ex.id, { name: e.target.value })}
                   placeholder="Exercise name"
-                  className="flex-1 bg-slate-50 dark:bg-[#1C2537] text-slate-900 dark:text-white placeholder-slate-400 rounded-xl px-3 py-2 text-sm outline-none border-2 border-transparent focus:border-blue-400 transition-colors"
+                  className="flex-1 bg-slate-50 dark:bg-ink-elevated text-slate-900 dark:text-white placeholder-slate-400 rounded-xl px-3 py-2 text-sm outline-none border-2 border-transparent focus:border-cobalt-400 transition-colors"
                 />
                 <button onClick={() => removeEx(ex.id)} className="text-slate-400 hover:text-red-400 transition-colors">
                   <Trash2 size={13} />
@@ -332,7 +332,7 @@ function WorkoutBuilder({ initial, onSave, onCancel }: {
                         updateEx(ex.id, { [f.key]: v });
                       }}
                       placeholder={f.key === 'weight' ? '—' : ''}
-                      className="w-full bg-slate-50 dark:bg-[#1C2537] text-slate-900 dark:text-white rounded-lg px-2.5 py-1.5 text-sm outline-none border-2 border-transparent focus:border-blue-400 transition-colors"
+                      className="w-full bg-slate-50 dark:bg-ink-elevated text-slate-900 dark:text-white rounded-lg px-2.5 py-1.5 text-sm outline-none border-2 border-transparent focus:border-cobalt-400 transition-colors"
                     />
                   </div>
                 ))}
@@ -342,7 +342,7 @@ function WorkoutBuilder({ initial, onSave, onCancel }: {
         </div>
         <button
           onClick={addEx}
-          className="mt-3 w-full py-2.5 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 text-sm text-slate-400 hover:border-blue-400 hover:text-blue-400 transition-colors flex items-center justify-center gap-1.5"
+          className="mt-3 w-full py-2.5 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 text-sm text-slate-400 hover:border-cobalt-400 hover:text-cobalt-400 transition-colors flex items-center justify-center gap-1.5"
         >
           <Plus size={13} /> Add exercise
         </button>
@@ -355,7 +355,7 @@ function WorkoutBuilder({ initial, onSave, onCancel }: {
         <button
           onClick={handleSave}
           disabled={saving || !canSave}
-          className="flex-1 py-3 rounded-2xl text-sm font-bold bg-blue-600 hover:bg-blue-700 active:scale-95 text-white transition-all disabled:opacity-40 shadow-lg shadow-blue-500/20"
+          className="flex-1 py-3 rounded-2xl text-sm font-bold bg-cobalt-500 hover:bg-cobalt-600 active:scale-95 text-white transition-all disabled:opacity-40 shadow-lg shadow-glow-cobalt"
         >
           {saving ? 'Saving…' : initial ? 'Update →' : 'Save Workout →'}
         </button>
@@ -451,7 +451,7 @@ export default function PlannerTab() {
         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Workout Planner</span>
         <button
           onClick={() => { setEditing(undefined); setView('builder'); }}
-          className="text-blue-500 text-xs font-semibold flex items-center gap-1 hover:text-blue-400 transition-colors"
+          className="text-cobalt-500 text-xs font-semibold flex items-center gap-1 hover:text-cobalt-400 transition-colors"
         >
           <Plus size={12} /> Plan Workout
         </button>
@@ -459,8 +459,8 @@ export default function PlannerTab() {
 
       {/* Today's workouts */}
       {todayPlans.length > 0 && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4 border border-blue-200 dark:border-blue-800/40">
-          <p className="text-[11px] font-bold text-blue-500 uppercase tracking-wider mb-2">Today</p>
+        <div className="bg-cobalt-500/10 dark:bg-cobalt-500/15 rounded-2xl p-4 border border-cobalt-500/30 dark:border-cobalt-500/40">
+          <p className="text-[11px] font-bold text-cobalt-500 uppercase tracking-wider mb-2">Today</p>
           <div className="space-y-2">
             {todayPlans.map(p => (
               <div key={p.id} className="flex items-center justify-between">
@@ -470,7 +470,7 @@ export default function PlannerTab() {
                 </div>
                 <button
                   onClick={() => { setActiveWorkout(p); setView('active'); }}
-                  className="flex items-center gap-1.5 bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-xl hover:bg-blue-700 active:scale-95 transition-all"
+                  className="flex items-center gap-1.5 bg-cobalt-500 text-white text-xs font-bold px-3 py-2 rounded-xl hover:bg-cobalt-600 active:scale-95 transition-all"
                 >
                   <Play size={11} /> Start
                 </button>
@@ -481,14 +481,14 @@ export default function PlannerTab() {
       )}
 
       {/* Tab toggle */}
-      <div className="flex gap-1 bg-slate-100 dark:bg-[#1C2537] rounded-xl p-1">
+      <div className="flex gap-1 bg-slate-100 dark:bg-ink-elevated rounded-xl p-1">
         {(['planned', 'done'] as const).map(t => (
           <button
             key={t}
             onClick={() => setListTab(t)}
             className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               listTab === t
-                ? 'bg-white dark:bg-[#0A0F1E] text-slate-900 dark:text-white shadow-sm'
+                ? 'bg-white dark:bg-ink text-slate-900 dark:text-white shadow-sm'
                 : 'text-slate-400 dark:text-slate-500'
             }`}
           >
@@ -552,7 +552,7 @@ function PlanCard({ plan, onStart, onEdit, onDuplicate, onDelete }: {
   const isDone = plan.status === 'done';
 
   return (
-    <div className={`bg-white dark:bg-[#111827] rounded-2xl border shadow-sm overflow-hidden ${isDone ? 'border-green-200 dark:border-green-900/30' : 'border-slate-200 dark:border-transparent'}`}>
+    <div className={`bg-white dark:bg-ink-surface rounded-2xl border shadow-sm overflow-hidden ${isDone ? 'border-green-200 dark:border-green-900/30' : 'border-slate-200 dark:border-transparent'}`}>
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
@@ -580,7 +580,7 @@ function PlanCard({ plan, onStart, onEdit, onDuplicate, onDelete }: {
             {onStart && (
               <button
                 onClick={onStart}
-                className="flex items-center gap-1 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-blue-700 active:scale-95 transition-all"
+                className="flex items-center gap-1 bg-cobalt-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-cobalt-600 active:scale-95 transition-all"
               >
                 <Play size={10} /> Start
               </button>
@@ -603,7 +603,7 @@ function PlanCard({ plan, onStart, onEdit, onDuplicate, onDelete }: {
 
             <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-700/50">
               {onEdit && (
-                <button onClick={onEdit} className="text-xs text-blue-400 hover:text-blue-300 font-semibold transition-colors">
+                <button onClick={onEdit} className="text-xs text-cobalt-400 hover:text-cobalt-300 font-semibold transition-colors">
                   Edit
                 </button>
               )}
