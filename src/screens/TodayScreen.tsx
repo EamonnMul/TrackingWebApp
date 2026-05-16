@@ -2,9 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { Plus, Check, Zap, Trash2, ChevronDown, Sun, Repeat2, Lightbulb } from 'lucide-react';
 import {
   getAllTodos, saveTodo, deleteTodo, getTodayString, formatDate,
-  getAllHabits, saveHabit, saveHabitEntry, getHabitEntryForDate,
+  getAllHabits, saveHabit, saveHabitEntry,
+  getAllHabitEntriesForHabit,
 } from '../utils/storage';
 import { Todo, Habit, HabitEntry, HabitCompletion, RecurrenceRule } from '../types';
+import {
+  deriveStreakState,
+  streakStateNeedsWrite,
+} from '../utils/habitStreak';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -95,6 +100,9 @@ export default function TodayScreen() {
   const [convertedHabitName, setConvertedHabitName] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const editRef = useRef<HTMLInputElement>(null);
+  // Full entry history per habit, kept in a ref so streak recomputation
+  // on toggle doesn't require another Firestore round-trip.
+  const entryHistoryRef = useRef<Record<string, HabitEntry[]>>({});
 
   useEffect(() => { load(); }, []);
   useEffect(() => {
@@ -106,16 +114,46 @@ export default function TodayScreen() {
     setTodos(allTodos.sort((a, b) => a.order - b.order));
 
     const relevantHabits = allHabits.filter(isHabitForToday);
-    setHabits(relevantHabits);
 
-    const entries: Record<string, HabitEntry> = {};
-    await Promise.all(
-      relevantHabits.map(async h => {
-        const e = await getHabitEntryForDate(h.id, today);
-        if (e) entries[h.id] = e;
-      })
+    // For each habit, pull its full entry history so we can derive an
+    // up-to-date streak (the cached habit.streakCount can be stale if
+    // the user missed a day without opening the app — that was the bug).
+    const allEntriesByHabit = await Promise.all(
+      relevantHabits.map(h => getAllHabitEntriesForHabit(h.id))
     );
+
+    // Recompute streak/lastCompletedDate per habit; write back to Firestore
+    // if it changed. Fire-and-forget so we don't block the UI.
+    const habitsWithFreshStreak = relevantHabits.map((h, i) => {
+      // Skip non-standard habit shapes (typed habits manage their own state)
+      if (h.type !== undefined) return h;
+      const derived = deriveStreakState(h, allEntriesByHabit[i], today);
+      if (streakStateNeedsWrite(h, derived)) {
+        const next: Habit = { ...h, streakCount: derived.streakCount };
+        if (derived.lastCompletedDate !== undefined) {
+          next.lastCompletedDate = derived.lastCompletedDate;
+        } else {
+          delete next.lastCompletedDate;
+        }
+        saveHabit(next).catch(() => {});
+        return next;
+      }
+      return h;
+    });
+    setHabits(habitsWithFreshStreak);
+
+    // Keep the existing "today's entry" map for the UI's quick lookup.
+    const entries: Record<string, HabitEntry> = {};
+    relevantHabits.forEach((h, i) => {
+      const todayEntry = allEntriesByHabit[i].find(e => e.date === today);
+      if (todayEntry) entries[h.id] = todayEntry;
+    });
     setHabitEntries(entries);
+
+    // Stash full entry history so toggleHabit can recompute without re-reading.
+    entryHistoryRef.current = Object.fromEntries(
+      relevantHabits.map((h, i) => [h.id, allEntriesByHabit[i]])
+    );
 
     // Smart suggestion: tasks completed 3+ times → offer to create habit
     const habitNames = new Set(allHabits.map(h => (h.name ?? h.action ?? '').toLowerCase().trim()));
@@ -304,28 +342,21 @@ export default function TodayScreen() {
     await saveHabitEntry(newEntry);
 
     if (habit.type !== undefined) return;
-    const wasCompleted = current !== 'none';
-    const isNowCompleted = next !== 'none';
-    if (wasCompleted === isNowCompleted) return;
 
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
-    let streakCount = habit.streakCount ?? 0;
-    let lastCompletedDate = habit.lastCompletedDate;
-    if (isNowCompleted) {
-      if (habit.lastCompletedDate === yesterdayStr) streakCount++;
-      else if (habit.lastCompletedDate !== today) streakCount = 1;
-      lastCompletedDate = today;
+    // Recompute streak from the full entry history. Source of truth is the
+    // entry list — never trust the cached habit.streakCount.
+    const history = entryHistoryRef.current[habitId] ?? [];
+    const otherEntries = history.filter(e => e.date !== today);
+    const updatedHistory = [...otherEntries, newEntry];
+    entryHistoryRef.current[habitId] = updatedHistory;
+
+    const derived = deriveStreakState(habit, updatedHistory, today);
+    const updated: Habit = { ...habit, streakCount: derived.streakCount };
+    if (derived.lastCompletedDate !== undefined) {
+      updated.lastCompletedDate = derived.lastCompletedDate;
     } else {
-      if (habit.lastCompletedDate === today) {
-        streakCount = Math.max(0, streakCount - 1);
-        lastCompletedDate = streakCount > 0 ? yesterdayStr : undefined;
-      }
+      delete updated.lastCompletedDate;
     }
-    const updated: Habit = { ...habit, streakCount };
-    if (lastCompletedDate !== undefined) updated.lastCompletedDate = lastCompletedDate;
-    else delete updated.lastCompletedDate;
     setHabits(prev => prev.map(h => h.id === habitId ? updated : h));
     saveHabit(updated).catch(() => {});
   }

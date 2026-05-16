@@ -340,7 +340,15 @@ export async function getAllHabitEntriesForHabit(habitId: string): Promise<Habit
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export function getTodayString(): string {
-  return new Date().toISOString().split('T')[0];
+  // Local YYYY-MM-DD — matches the user's wall clock. Previously this
+  // used `toISOString()`, which is UTC and rolls over at midnight UTC.
+  // For users not in UTC that produced wrong "today" and a 1-day
+  // mismatch in streak / habit-entry keys.
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 export function formatDate(dateStr: string): string {

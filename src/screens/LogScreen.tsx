@@ -35,6 +35,7 @@ import {
   deleteHabit as persistDeleteHabit,
   getHabitEntryForDate,
   saveHabitEntry,
+  getAllHabitEntriesForHabit,
   getHabitRewardGoal,
   saveHabitRewardGoal,
   saveTodo,
@@ -53,6 +54,7 @@ import {
   DayWorkout, WorkoutSet, RunEntry, Exercise, GratitudeEntry,
   Habit, HabitEntry, HabitRewardGoal, HabitType, HabitCheckpoint, HabitCompletion, HabitFrequency, WeightUnit, WeightEntry, Todo, RecurrenceRule,
 } from '../types';
+import { deriveStreakState, streakStateNeedsWrite } from '../utils/habitStreak';
 
 const today = getTodayString();
 
@@ -480,43 +482,30 @@ export default function LogScreen() {
 
     const wasCompleted = current !== 'none';
     const isNowCompleted = next !== 'none';
-    if (wasCompleted === isNowCompleted) return; // full ↔ micro swap, no streak change
 
-    // Update reward balance
-    if (habitReward) {
+    // Reward balance still keys off completion-state change
+    if (wasCompleted !== isNowCompleted && habitReward) {
       const delta = isNowCompleted ? habitReward.earnPerCompletion : -habitReward.earnPerCompletion;
       const updatedReward = { ...habitReward, balance: Math.max(0, Math.min(habitReward.budget, habitReward.balance + delta)), updatedAt: Date.now() };
       setHabitReward(updatedReward);
       saveHabitRewardGoal(updatedReward).catch(() => {});
     }
 
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-    let streakCount = habit.streakCount ?? 0;
-    let lastCompletedDate = habit.lastCompletedDate;
-
-    if (isNowCompleted) {
-      if (habit.lastCompletedDate === yesterdayStr) {
-        streakCount = streakCount + 1;
-      } else if (habit.lastCompletedDate !== today) {
-        streakCount = 1;
-      }
-      lastCompletedDate = today;
-    } else {
-      // uncompleting today
-      if (habit.lastCompletedDate === today) {
-        streakCount = Math.max(0, streakCount - 1);
-        lastCompletedDate = streakCount > 0 ? yesterdayStr : undefined;
-      }
+    // Recompute streak from the full entry history. The previous logic
+    // walked from yesterday only and never detected longer gaps.
+    const allEntries = await getAllHabitEntriesForHabit(habitId);
+    const merged: HabitEntry[] = [
+      ...allEntries.filter(e => e.date !== today),
+      { id: `${habitId}_${today}`, habitId, date: today, completion: next, createdAt: Date.now() },
+    ];
+    const derived = deriveStreakState(habit, merged, today);
+    if (streakStateNeedsWrite(habit, derived)) {
+      const updated: Habit = { ...habit, streakCount: derived.streakCount };
+      if (derived.lastCompletedDate !== undefined) updated.lastCompletedDate = derived.lastCompletedDate;
+      else delete updated.lastCompletedDate;
+      setHabits(prev => prev.map(h => h.id === habitId ? updated : h));
+      await saveHabit(updated);
     }
-
-    const updated: Habit = { ...habit, streakCount };
-    if (lastCompletedDate !== undefined) updated.lastCompletedDate = lastCompletedDate;
-    else delete updated.lastCompletedDate;
-    setHabits(prev => prev.map(h => h.id === habitId ? updated : h));
-    await saveHabit(updated);
   }
 
   async function handleAddHabit(habit: Habit) {
