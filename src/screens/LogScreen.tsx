@@ -55,6 +55,7 @@ import {
   Habit, HabitEntry, HabitRewardGoal, HabitType, HabitCheckpoint, HabitCompletion, HabitFrequency, WeightUnit, WeightEntry, Todo, RecurrenceRule,
 } from '../types';
 import { deriveStreakState, streakStateNeedsWrite } from '../utils/habitStreak';
+import { ScreenLoader } from '../components/ui';
 
 const today = getTodayString();
 
@@ -694,11 +695,7 @@ export default function LogScreen() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-cobalt-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <ScreenLoader />;
   }
 
   const WEIGHT_STEP = weightUnit === 'stone' ? 0.1 : 0.1;

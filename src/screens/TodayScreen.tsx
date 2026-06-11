@@ -1,15 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Check, Zap, Trash2, ChevronDown, Sun, Repeat2, Lightbulb } from 'lucide-react';
+import {
+  Plus, Check, Zap, Trash2, ChevronDown, Sun, Repeat2, Lightbulb,
+  Flame, Footprints, Scale, Dumbbell,
+} from 'lucide-react';
 import {
   getAllTodos, saveTodo, deleteTodo, getTodayString, formatDate,
   getAllHabits, saveHabit, saveHabitEntry,
   getAllHabitEntriesForHabit,
+  getAllRuns, getAllWeightEntries, getWeightGoal, getWeightUnit, kgToUnit,
+  getAllExercises, getAllWorkoutsForExercise, DEFAULT_EXERCISE_ID,
 } from '../utils/storage';
-import { Todo, Habit, HabitEntry, HabitCompletion, RecurrenceRule } from '../types';
+import {
+  Todo, Habit, HabitEntry, HabitCompletion, RecurrenceRule,
+  WeightEntry, WeightGoal, WeightUnit,
+} from '../types';
 import {
   deriveStreakState,
   streakStateNeedsWrite,
 } from '../utils/habitStreak';
+import {
+  ProgressRing, Sparkline, StatTile, SkeletonTile, SectionLabel, EmptyState, ScreenLoader,
+} from '../components/ui';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -53,6 +64,27 @@ function nextOccurrence(rule: RecurrenceRule, fromDate: string): string {
 }
 
 const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+/** Monday of the current week, local time, as YYYY-MM-DD. */
+function getWeekStartLocal(todayStr: string): string {
+  const [y, m, d] = todayStr.split('-').map(Number);
+  const dt = new Date(y, m - 1, d, 12);
+  const dow = dt.getDay(); // 0=Sun
+  const diff = dow === 0 ? 6 : dow - 1;
+  dt.setDate(dt.getDate() - diff);
+  const yy = dt.getFullYear();
+  const mm = String(dt.getMonth() + 1).padStart(2, '0');
+  const dd = String(dt.getDate()).padStart(2, '0');
+  return `${yy}-${mm}-${dd}`;
+}
+
+interface Snapshot {
+  weights: WeightEntry[];     // sorted ascending by date
+  weightGoal: WeightGoal | null;
+  weightUnit: WeightUnit;
+  runKmWeek: number;
+  setsWeek: number;
+}
 
 const PRIORITY_COLORS: Record<string, string> = {
   high: 'text-red-400',
@@ -103,8 +135,45 @@ export default function TodayScreen() {
   // Full entry history per habit, kept in a ref so streak recomputation
   // on toggle doesn't require another Firestore round-trip.
   const entryHistoryRef = useRef<Record<string, HabitEntry[]>>({});
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [bumpedHabit, setBumpedHabit] = useState<string | null>(null);
 
   useEffect(() => { load(); }, []);
+
+  // Snapshot data loads after the core UI so first paint stays fast.
+  useEffect(() => {
+    if (loading) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const weekStart = getWeekStartLocal(today);
+        const [weights, weightGoal, weightUnit, runs, exercises] = await Promise.all([
+          getAllWeightEntries(),
+          getWeightGoal(),
+          getWeightUnit(),
+          getAllRuns(),
+          getAllExercises(),
+        ]);
+        const exerciseIds = [DEFAULT_EXERCISE_ID, ...exercises.map(e => e.id).filter(id => id !== DEFAULT_EXERCISE_ID)];
+        const workoutLists = await Promise.all(exerciseIds.map(id => getAllWorkoutsForExercise(id)));
+        const setsWeek = workoutLists.flat()
+          .filter(w => w.date >= weekStart && w.date <= today)
+          .reduce((sum, w) => sum + w.sets.length, 0);
+        const runKmWeek = runs
+          .filter(r => r.date >= weekStart && r.date <= today)
+          .reduce((sum, r) => sum + r.distanceKm, 0);
+        if (!cancelled) {
+          setSnapshot({
+            weights: [...weights].sort((a, b) => a.date.localeCompare(b.date)),
+            weightGoal, weightUnit, runKmWeek, setsWeek,
+          });
+        }
+      } catch {
+        if (!cancelled) setSnapshot({ weights: [], weightGoal: null, weightUnit: 'kg', runKmWeek: 0, setsWeek: 0 });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [loading]);
   useEffect(() => {
     if (editingTitle) setTimeout(() => editRef.current?.focus(), 50);
   }, [editingTitle]);
@@ -330,6 +399,10 @@ export default function TodayScreen() {
     const entry = habitEntries[habitId];
     const current = entry?.completion ?? 'none';
     const next: HabitCompletion = current === 'full' ? 'none' : 'full';
+    if (next === 'full') {
+      setBumpedHabit(habitId);
+      setTimeout(() => setBumpedHabit(b => (b === habitId ? null : b)), 400);
+    }
     const newEntry: HabitEntry = {
       ...(entry ?? {}),
       id: `${habitId}_${today}`,
@@ -377,14 +450,26 @@ export default function TodayScreen() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-cobalt-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <ScreenLoader />;
   }
 
-  const progressPct = habits.length > 0 ? (habitsDone / habits.length) * 100 : 0;
+  const allHabitsDone = habits.length > 0 && habitsDone === habits.length;
+
+  // Ring tracks habits when they exist, otherwise today's tasks.
+  const todayDoneCount = todayTodos.filter(t => t.done).length;
+  const ringDone = habits.length > 0 ? habitsDone : todayDoneCount;
+  const ringTotal = habits.length > 0 ? habits.length : todayTodos.length;
+  const progressPct = ringTotal > 0 ? (ringDone / ringTotal) * 100 : 0;
+
+  // One clear next action: first unfinished habit, else first pending task.
+  const nextHabit = habits.find(h => !isHabitDone(h, habitEntries[h.id]));
+  const nextTask = !nextHabit ? todayTodos.find(t => !t.done) : undefined;
+
+  // Weight snapshot derivations
+  const latestWeight = snapshot && snapshot.weights.length > 0
+    ? snapshot.weights[snapshot.weights.length - 1] : null;
+  const weightDelta = latestWeight && snapshot?.weightGoal
+    ? latestWeight.kg - snapshot.weightGoal.targetKg : null;
 
   return (
     <div className="space-y-5">
@@ -397,27 +482,169 @@ export default function TodayScreen() {
         </h1>
       </div>
 
-      {/* Progress summary */}
+      {/* ── Hero: today's loop ─────────────────────────────────────────────── */}
       {(habits.length > 0 || todayPendingCount > 0) && (
-        <div className="flex items-center gap-3">
-          {habits.length > 0 && (
-            <div className="flex-1 bg-white dark:bg-ink-surface rounded-2xl px-4 py-3 border border-slate-200 dark:border-transparent shadow-sm">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Habits</p>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div className="h-full bg-cobalt-500 rounded-full transition-all" style={{ width: `${progressPct}%` }} />
-                </div>
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0">{habitsDone}/{habits.length}</span>
-              </div>
-            </div>
-          )}
-          {todayPendingCount > 0 && (
-            <div className="bg-white dark:bg-ink-surface rounded-2xl px-4 py-3 border border-slate-200 dark:border-transparent shadow-sm shrink-0">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tasks</p>
-              <p className="text-xl font-extrabold text-slate-900 dark:text-white">{todayPendingCount}</p>
-            </div>
+        <div className={`card-elevated p-4 flex items-center gap-4 ${allHabitsDone ? 'border-success-500/40' : ''}`}>
+          <ProgressRing pct={progressPct} size={64} stroke={5}>
+            <span className="tabular text-sm font-extrabold text-slate-900 dark:text-white">
+              {ringDone}/{ringTotal}
+            </span>
+          </ProgressRing>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">
+              {allHabitsDone ? 'All habits done' : 'Up next'}
+            </p>
+            {nextHabit ? (
+              <>
+                <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate">
+                  {nextHabit.name ?? nextHabit.action ?? 'Habit'}
+                </p>
+                {(nextHabit.microHabit || nextHabit.nextAction) && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate flex items-center gap-1">
+                    <Zap size={10} className="text-fire-500 shrink-0" />
+                    {nextHabit.microHabit ?? nextHabit.nextAction}
+                  </p>
+                )}
+              </>
+            ) : nextTask ? (
+              <>
+                <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate">{nextTask.title}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {todayPendingCount} task{todayPendingCount !== 1 ? 's' : ''} left today
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-[15px] font-bold text-success-500">Clean sweep.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Everything's logged. Go be a big dawg.</p>
+              </>
+            )}
+          </div>
+          {nextHabit && (
+            <button
+              onClick={() => toggleHabit(nextHabit.id)}
+              aria-label={`Complete ${nextHabit.name ?? 'habit'}`}
+              className="shrink-0 w-10 h-10 rounded-full bg-cobalt-500 hover:bg-cobalt-600 active:scale-90 text-white flex items-center justify-center transition-all shadow-glow-cobalt"
+            >
+              <Check size={18} strokeWidth={3} />
+            </button>
           )}
         </div>
+      )}
+
+      {/* ── Snapshot: weight · running · lifting ───────────────────────────── */}
+      {snapshot === null ? (
+        <div className="flex gap-2">
+          <SkeletonTile /><SkeletonTile /><SkeletonTile />
+        </div>
+      ) : (snapshot.weights.length > 0 || snapshot.runKmWeek > 0 || snapshot.setsWeek > 0) && (
+        <div className="flex gap-2">
+          {latestWeight && (
+            <StatTile
+              icon={Scale}
+              label="Weight"
+              value={kgToUnit(latestWeight.kg, snapshot.weightUnit).toFixed(1)}
+              unit={snapshot.weightUnit}
+              sub={
+                weightDelta !== null && (
+                  <span className={Math.abs(weightDelta) < 0.05 ? 'text-success-500' : 'text-slate-500 dark:text-slate-400'}>
+                    {Math.abs(weightDelta) < 0.05
+                      ? 'At goal'
+                      : `${Math.abs(kgToUnit(Math.abs(weightDelta), snapshot.weightUnit)).toFixed(1)} ${snapshot.weightUnit} to goal`}
+                  </span>
+                )
+              }
+            >
+              {snapshot.weights.length >= 2 && (
+                <div className="mt-1.5">
+                  <Sparkline values={snapshot.weights.slice(-14).map(w => w.kg)} />
+                </div>
+              )}
+            </StatTile>
+          )}
+          <StatTile
+            icon={Footprints}
+            label="Run · wk"
+            value={snapshot.runKmWeek.toFixed(1)}
+            unit="km"
+          />
+          <StatTile
+            icon={Dumbbell}
+            label="Sets · wk"
+            value={String(snapshot.setsWeek)}
+          />
+        </div>
+      )}
+
+      {/* ── Habits ──────────────────────────────────────────────────────────── */}
+      {habits.length > 0 && (
+        <section>
+          <SectionLabel
+            right={
+              allHabitsDone ? (
+                <span className="chip-success">
+                  <Check size={10} strokeWidth={3} /> Clean sweep
+                </span>
+              ) : undefined
+            }
+          >
+            Habits
+          </SectionLabel>
+          <div className="card overflow-hidden">
+            {habits.map(habit => {
+              const entry = habitEntries[habit.id];
+              const done = isHabitDone(habit, entry);
+              const streak = habit.streakCount ?? 0;
+              const linkedPendingTasks = todos.filter(t => !t.done && t.sourceHabitId === habit.id);
+              return (
+                <div
+                  key={habit.id}
+                  className={`border-b border-slate-100 dark:border-line last:border-0 ${
+                    bumpedHabit === habit.id ? 'animate-habit-bump' : ''
+                  }`}
+                >
+                  <div className={`flex items-center px-4 py-3.5 gap-3 transition-colors ${done ? 'bg-success-500/[0.04]' : ''}`}>
+                    <button
+                      onClick={() => toggleHabit(habit.id)}
+                      aria-label={`${done ? 'Uncheck' : 'Complete'} ${habit.name ?? 'habit'}`}
+                      className="flex-shrink-0 transition-all active:scale-90"
+                    >
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                        done
+                          ? 'bg-success-500 shadow-glow-success'
+                          : 'border-2 border-slate-300 dark:border-slate-600 hover:border-cobalt-400'
+                      }`}>
+                        {done && <Check size={13} strokeWidth={3} className="text-white" />}
+                      </div>
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-semibold transition-colors ${done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-white'}`}>
+                        {habit.name ?? habit.action ?? 'Habit'}
+                      </p>
+                      {habit.nextAction && !done && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                          <Zap size={10} className="text-fire-500 shrink-0" />
+                          {habit.nextAction}
+                        </p>
+                      )}
+                      {linkedPendingTasks.length > 0 && (
+                        <p className="text-[10px] text-violet-400 mt-0.5">
+                          {linkedPendingTasks.length} linked task{linkedPendingTasks.length !== 1 ? 's' : ''}
+                        </p>
+                      )}
+                    </div>
+                    {streak > 0 && (
+                      <span className="chip-fire flex-shrink-0">
+                        <Flame size={10} strokeWidth={2.5} />
+                        <span className="tabular">{streak}d</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       )}
 
       {/* ── Tasks ─────────────────────────────────────────────────────────── */}
@@ -601,53 +828,6 @@ export default function TodayScreen() {
         )}
       </section>
 
-      {/* ── Habits ──────────────────────────────────────────────────────────── */}
-      {habits.length > 0 && (
-        <section>
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Habits</p>
-          <div className="bg-white dark:bg-ink-surface rounded-2xl overflow-hidden border border-slate-200 dark:border-transparent shadow-sm">
-            {habits.map(habit => {
-              const entry = habitEntries[habit.id];
-              const done = isHabitDone(habit, entry);
-              const streak = habit.streakCount ?? 0;
-              const linkedPendingTasks = todos.filter(t => !t.done && t.sourceHabitId === habit.id);
-              return (
-                <div key={habit.id} className="border-b border-slate-100 dark:border-line last:border-0">
-                  <div className="flex items-center px-4 py-3.5 gap-3">
-                    <button onClick={() => toggleHabit(habit.id)} className="flex-shrink-0 transition-all active:scale-90">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                        done ? 'bg-cobalt-500' : 'border-2 border-slate-300 dark:border-slate-600 hover:border-cobalt-400'
-                      }`}>
-                        {done && <Check size={12} className="text-white" />}
-                      </div>
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-semibold ${done ? 'line-through text-slate-400' : 'text-slate-900 dark:text-white'}`}>
-                        {habit.name ?? habit.action ?? 'Habit'}
-                      </p>
-                      {habit.nextAction && !done && (
-                        <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                          <Zap size={10} className="text-yellow-500 shrink-0" />
-                          {habit.nextAction}
-                        </p>
-                      )}
-                      {linkedPendingTasks.length > 0 && (
-                        <p className="text-[10px] text-violet-400 mt-0.5">
-                          {linkedPendingTasks.length} linked task{linkedPendingTasks.length !== 1 ? 's' : ''}
-                        </p>
-                      )}
-                    </div>
-                    {streak > 0 && (
-                      <span className="text-xs font-bold text-orange-400 flex-shrink-0">🔥{streak}d</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
       {/* ── Smart suggestion ──────────────────────────────────────────────── */}
       {suggestion && !suggestionDismissed && (
         <div className="bg-white dark:bg-ink-surface rounded-2xl p-4 border border-violet-200 dark:border-violet-900/30 shadow-sm">
@@ -673,11 +853,11 @@ export default function TodayScreen() {
 
       {/* Empty state */}
       {displayTodos.length === 0 && habits.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-3xl mb-3">🌅</p>
-          <p className="text-base font-bold text-slate-900 dark:text-white">Your day is clear</p>
-          <p className="text-sm text-slate-400 mt-1">Add tasks above or habits in the Log tab.</p>
-        </div>
+        <EmptyState
+          icon={Sun}
+          title="Your day is clear"
+          hint="Add a task above, or set up habits in the Log tab."
+        />
       )}
 
       {/* Toast */}

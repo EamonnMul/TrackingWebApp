@@ -42,6 +42,7 @@ import { ChevronDown, Trash2, Plus, ImagePlus, X, Pencil, Link2, Link2Off } from
 import { SortableTabBar, TabDef } from '../components/SortableTabBar';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getStravaStatus, startStravaOAuth, disconnectStrava, StravaStatus } from '../utils/strava';
+import { ScreenLoader } from '../components/ui';
 
 const DEFAULT_EXERCISE: Exercise = {
   id: DEFAULT_EXERCISE_ID,
@@ -466,11 +467,7 @@ export default function ProgressScreen() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-cobalt-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <ScreenLoader />;
   }
 
   // Exercise filter

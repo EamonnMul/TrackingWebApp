@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Flag, Calendar, ChevronDown, Sun, Repeat2 } from 'lucide-react';
 import { getAllTodos, saveTodo, deleteTodo, getTodayString, formatDate, getAllHabits, saveHabit } from '../utils/storage';
 import { Todo, Habit, RecurrenceRule } from '../types';
+import { ScreenLoader } from '../components/ui';
 
 // ─── Recurrence helpers ───────────────────────────────────────────────────────
 
@@ -224,11 +225,7 @@ export default function TodoScreen() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-cobalt-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <ScreenLoader />;
   }
 
   const incompleteTodos = displayTodos.filter(t => !t.done);
