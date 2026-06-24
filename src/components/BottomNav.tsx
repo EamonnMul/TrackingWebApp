@@ -7,7 +7,7 @@ import {
   SortableContext, horizontalListSortingStrategy, useSortable, arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Home, Dumbbell, LineChart, LucideIcon } from 'lucide-react';
+import { Home, Dumbbell, Flame, LineChart, LucideIcon } from 'lucide-react';
 import { getAllTodos, getTodayString } from '../utils/storage';
 
 // ─── Tab definitions ─────────────────────────────────────────────────────────
@@ -21,9 +21,11 @@ interface Tab {
 const DEFAULT_TABS: Tab[] = [
   { id: '/today',    label: 'Home',     Icon: Home },
   { id: '/',         label: 'Log',      Icon: Dumbbell },
+  { id: '/fuel',     label: 'Fuel',     Icon: Flame },
   { id: '/progress', label: 'Progress', Icon: LineChart },
 ];
-const NAV_ORDER_KEY = 'bottomNavOrder_v5';
+// Bumped v5 → v6 so a previously-saved 3-tab order doesn't hide the new Fuel tab.
+const NAV_ORDER_KEY = 'bottomNavOrder_v6';
 
 function loadTabOrder(): Tab[] {
   try {

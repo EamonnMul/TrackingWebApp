@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Plus, Check, Zap, Trash2, ChevronDown, Sun, Repeat2, Lightbulb,
-  Flame, Footprints, Scale, Dumbbell,
+  Flame, Footprints, Scale, Dumbbell, Beef, ChevronRight,
 } from 'lucide-react';
 import {
   getAllTodos, saveTodo, deleteTodo, getTodayString, formatDate,
@@ -10,9 +11,11 @@ import {
   getAllRuns, getAllWeightEntries, getWeightGoal, getWeightUnit, kgToUnit,
   getAllExercises, getAllWorkoutsForExercise, DEFAULT_EXERCISE_ID,
 } from '../utils/storage';
+import { getNutritionEntry, getNutritionTarget } from '../utils/nutrition';
+import { sumFoodLogs, pctOfTarget, remaining } from '../utils/nutritionCalc';
 import {
   Todo, Habit, HabitEntry, HabitCompletion, RecurrenceRule,
-  WeightEntry, WeightGoal, WeightUnit,
+  WeightEntry, WeightGoal, WeightUnit, NutritionEntry, NutritionTarget,
 } from '../types';
 import {
   deriveStreakState,
@@ -84,6 +87,8 @@ interface Snapshot {
   weightUnit: WeightUnit;
   runKmWeek: number;
   setsWeek: number;
+  nutritionEntry: NutritionEntry | null;
+  nutritionTarget: NutritionTarget | null;
 }
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -111,6 +116,7 @@ function isHabitDone(habit: Habit, entry: HabitEntry | undefined): boolean {
 type TaskView = 'today' | 'all';
 
 export default function TodayScreen() {
+  const navigate = useNavigate();
   const today = getTodayString();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -147,12 +153,14 @@ export default function TodayScreen() {
     (async () => {
       try {
         const weekStart = getWeekStartLocal(today);
-        const [weights, weightGoal, weightUnit, runs, exercises] = await Promise.all([
+        const [weights, weightGoal, weightUnit, runs, exercises, nutritionEntry, nutritionTarget] = await Promise.all([
           getAllWeightEntries(),
           getWeightGoal(),
           getWeightUnit(),
           getAllRuns(),
           getAllExercises(),
+          getNutritionEntry(today),
+          getNutritionTarget(),
         ]);
         const exerciseIds = [DEFAULT_EXERCISE_ID, ...exercises.map(e => e.id).filter(id => id !== DEFAULT_EXERCISE_ID)];
         const workoutLists = await Promise.all(exerciseIds.map(id => getAllWorkoutsForExercise(id)));
@@ -166,10 +174,11 @@ export default function TodayScreen() {
           setSnapshot({
             weights: [...weights].sort((a, b) => a.date.localeCompare(b.date)),
             weightGoal, weightUnit, runKmWeek, setsWeek,
+            nutritionEntry, nutritionTarget,
           });
         }
       } catch {
-        if (!cancelled) setSnapshot({ weights: [], weightGoal: null, weightUnit: 'kg', runKmWeek: 0, setsWeek: 0 });
+        if (!cancelled) setSnapshot({ weights: [], weightGoal: null, weightUnit: 'kg', runKmWeek: 0, setsWeek: 0, nutritionEntry: null, nutritionTarget: null });
       }
     })();
     return () => { cancelled = true; };
@@ -574,6 +583,15 @@ export default function TodayScreen() {
             value={String(snapshot.setsWeek)}
           />
         </div>
+      )}
+
+      {/* ── Nutrition summary → Fuel ───────────────────────────────────────── */}
+      {snapshot?.nutritionTarget && (
+        <NutritionSummaryCard
+          entry={snapshot.nutritionEntry}
+          target={snapshot.nutritionTarget}
+          onClick={() => navigate('/fuel')}
+        />
       )}
 
       {/* ── Habits ──────────────────────────────────────────────────────────── */}
@@ -1086,5 +1104,59 @@ function TaskItem({
         </div>
       )}
     </div>
+  );
+}
+
+// ─── Nutrition summary card (links to Fuel) ─────────────────────────────────
+
+function NutritionSummaryCard({
+  entry, target, onClick,
+}: {
+  entry: NutritionEntry | null;
+  target: NutritionTarget;
+  onClick: () => void;
+}) {
+  const totals = sumFoodLogs(entry?.items ?? []);
+  const calPct = pctOfTarget(target.calories, totals.calories);
+  const proPct = pctOfTarget(target.protein, totals.protein);
+  const calLeft = remaining(target.calories, totals.calories);
+  const proLeft = remaining(target.protein, totals.protein);
+
+  return (
+    <section>
+      <SectionLabel right={<ChevronRight size={14} className="text-slate-300 dark:text-slate-600" />}>
+        Fuel
+      </SectionLabel>
+      <button
+        onClick={onClick}
+        className="card w-full p-4 flex items-center gap-4 text-left hover:border-cobalt-500/40 active:scale-[0.995] transition-all"
+      >
+        <ProgressRing pct={calPct} size={56} stroke={5}>
+          <Flame size={16} className="text-fire-500" />
+        </ProgressRing>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline gap-1.5">
+            <span className="tabular text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              {Math.round(totals.calories).toLocaleString()}
+            </span>
+            <span className="text-xs font-semibold text-slate-400">/ {target.calories.toLocaleString()} kcal</span>
+          </div>
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <Beef size={11} className="text-cobalt-500 shrink-0" />
+            <div className="progress-track h-1.5 flex-1">
+              <div className="progress-fill" style={{ width: `${Math.min(100, proPct)}%` }} />
+            </div>
+            <span className="tabular text-[11px] font-bold text-slate-600 dark:text-slate-300 shrink-0">
+              {Math.round(totals.protein)}/{target.protein}g
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
+            {entry && entry.items.length > 0
+              ? `${calLeft.toLocaleString()} kcal · ${Math.round(proLeft)}g protein left`
+              : 'Nothing logged yet — tap to start'}
+          </p>
+        </div>
+      </button>
+    </section>
   );
 }

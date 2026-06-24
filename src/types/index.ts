@@ -212,3 +212,121 @@ export interface WorkoutPlan {
   createdAt: number;
   completedAt?: number;
 }
+
+// ─── Nutrition ──────────────────────────────────────────────────────────────
+
+export type MealCategory = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+
+export const MEAL_CATEGORIES: MealCategory[] = ['breakfast', 'lunch', 'dinner', 'snack'];
+
+/** Where a logged food came from. */
+export type FoodSource =
+  | 'manual'
+  | 'quick_add'
+  | 'saved_food'
+  | 'saved_meal'
+  | 'barcode_scan'
+  | 'external_database';
+
+/**
+ * A single logged food. IMPORTANT: this is a SNAPSHOT — the nutrition numbers
+ * are copied in at log time and never reference a live SavedFood/external
+ * product, so editing a saved food later never rewrites historical logs.
+ * All macro values are the totals for `quantity × servingSize` as logged.
+ */
+export interface FoodLog {
+  id: string;
+  name: string;
+  brand?: string;
+  meal: MealCategory;
+  calories: number;       // total for the amount consumed
+  protein: number;        // grams
+  carbs?: number;         // grams
+  fat?: number;           // grams
+  fibre?: number;         // grams
+  servingSize?: string;   // human label, e.g. "1 scoop (30g)"
+  quantity: number;       // multiplier applied to the base serving
+  loggedAt: number;       // unix ms
+  source: FoodSource;
+  savedFoodId?: string;   // provenance only — never read for nutrition values
+  barcode?: string;
+}
+
+/** One day's nutrition, keyed by YYYY-MM-DD doc id (local date). */
+export interface NutritionEntry {
+  date: string;           // 'YYYY-MM-DD'
+  items: FoodLog[];
+  updatedAt: number;
+}
+
+/** A reusable food the user has saved. Per-serving values. */
+export interface SavedFood {
+  id: string;
+  name: string;
+  brand?: string;
+  caloriesPerServing: number;
+  proteinPerServing: number;
+  carbsPerServing?: number;
+  fatPerServing?: number;
+  fibrePerServing?: number;
+  servingSize?: string;   // human label for one serving
+  barcode?: string;
+  usageCount: number;
+  lastUsedAt: number;
+  createdAt: number;
+}
+
+/** A component of a saved meal — a snapshot of a food + quantity. */
+export interface MealComponent {
+  name: string;
+  brand?: string;
+  calories: number;       // per single serving of this component
+  protein: number;
+  carbs?: number;
+  fat?: number;
+  fibre?: number;
+  servingSize?: string;
+  quantity: number;       // how many servings in the meal
+  savedFoodId?: string;
+}
+
+/** A saved meal = a named bundle of food components. */
+export interface SavedMeal {
+  id: string;
+  name: string;
+  components: MealComponent[];
+  defaultMeal?: MealCategory; // suggested category when logging
+  usageCount: number;
+  lastUsedAt: number;
+  createdAt: number;
+}
+
+export type NutritionMode = 'cutting' | 'maintenance' | 'bulking';
+
+/** Daily nutrition targets (single config doc). */
+export interface NutritionTarget {
+  calories: number;
+  protein: number;        // grams
+  carbs?: number;
+  fat?: number;
+  fibre?: number;
+  water?: number;         // ml or glasses — optional
+  mode?: NutritionMode;
+  showMacros?: boolean;   // reveal carbs/fat/fibre/water on the dashboard
+  updatedAt: number;
+}
+
+/** Denormalised quick-access list: the last foods used, newest first. */
+export interface RecentFood {
+  name: string;
+  brand?: string;
+  caloriesPerServing: number;
+  proteinPerServing: number;
+  carbsPerServing?: number;
+  fatPerServing?: number;
+  fibrePerServing?: number;
+  servingSize?: string;
+  savedFoodId?: string;
+  barcode?: string;
+  lastUsedAt: number;
+}

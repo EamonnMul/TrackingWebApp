@@ -8,6 +8,7 @@ import LogScreen from './screens/LogScreen';
 import ProgressScreen from './screens/ProgressScreen';
 import TodoScreen from './screens/TodoScreen';
 import TodayScreen from './screens/TodayScreen';
+import NutritionScreen from './screens/NutritionScreen';
 import DailyCheckIn, { shouldShowCheckIn, markCheckInDone } from './components/DailyCheckIn';
 
 export default function App() {
@@ -72,6 +73,7 @@ export default function App() {
           <Routes>
             <Route path="/today" element={<TodayScreen />} />
             <Route path="/" element={<LogScreen />} />
+            <Route path="/fuel" element={<NutritionScreen />} />
             <Route path="/progress" element={<ProgressScreen />} />
             <Route path="/tasks" element={<TodoScreen />} />
           </Routes>

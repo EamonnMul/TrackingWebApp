@@ -2,8 +2,8 @@
  * Shared UI primitives — the building blocks of the design system.
  * Keep these dumb and presentational; no data fetching, no Firebase.
  */
-import { ReactNode } from 'react';
-import { LucideIcon } from 'lucide-react';
+import { ReactNode, useEffect } from 'react';
+import { LucideIcon, X, Minus, Plus } from 'lucide-react';
 
 // ─── Spinner ─────────────────────────────────────────────────────────────────
 
@@ -198,5 +198,167 @@ export function SkeletonTile() {
       <div className="h-2.5 w-12 rounded bg-slate-200 dark:bg-ink-inset mb-2.5" />
       <div className="h-5 w-16 rounded bg-slate-200 dark:bg-ink-inset" />
     </div>
+  );
+}
+
+// ─── Bottom sheet ────────────────────────────────────────────────────────────
+
+/**
+ * Mobile-first modal that slides up from the bottom. Tap backdrop or X to close.
+ * Locks body scroll while open.
+ */
+export function BottomSheet({
+  open,
+  onClose,
+  title,
+  eyebrow,
+  children,
+  footer,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  eyebrow?: string;
+  children: ReactNode;
+  footer?: ReactNode;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+  return (
+    <div
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end justify-center"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white dark:bg-ink-surface w-full max-w-lg rounded-t-3xl
+                   border-t border-slate-200 dark:border-line flex flex-col animate-fade-in"
+        style={{ maxHeight: '90vh' }}
+        onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-line" />
+        </div>
+        <div className="flex items-start justify-between px-5 pt-2 pb-3 border-b border-slate-200 dark:border-line">
+          <div>
+            {eyebrow && <p className="eyebrow-accent">{eyebrow}</p>}
+            <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white mt-0.5">{title}</h2>
+          </div>
+          <button onClick={onClose} className="btn-icon" aria-label="Close">
+            <X size={16} />
+          </button>
+        </div>
+        <div className="overflow-y-auto flex-1 px-5 py-4" style={{ overscrollBehavior: 'contain' }}>
+          {children}
+        </div>
+        {footer && (
+          <div className="px-5 py-3 border-t border-slate-200 dark:border-line">{footer}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Number field with steppers ──────────────────────────────────────────────
+
+export function Stepper({
+  value,
+  onChange,
+  step = 1,
+  min = 0,
+  max,
+  suffix,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  step?: number;
+  min?: number;
+  max?: number;
+  suffix?: string;
+}) {
+  const clamp = (n: number) => {
+    let v = Math.round(n * 100) / 100;
+    if (min != null) v = Math.max(min, v);
+    if (max != null) v = Math.min(max, v);
+    return v;
+  };
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => onChange(clamp(value - step))}
+        className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-ink-inset border border-slate-200 dark:border-line
+                   flex items-center justify-center text-cobalt-500 active:scale-95 transition-all"
+        aria-label="Decrease"
+      >
+        <Minus size={16} />
+      </button>
+      <div className="flex-1 flex items-baseline justify-center gap-1">
+        <span className="tabular text-2xl font-extrabold text-slate-900 dark:text-white">{value}</span>
+        {suffix && <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{suffix}</span>}
+      </div>
+      <button
+        type="button"
+        onClick={() => onChange(clamp(value + step))}
+        className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-ink-inset border border-slate-200 dark:border-line
+                   flex items-center justify-center text-cobalt-500 active:scale-95 transition-all"
+        aria-label="Increase"
+      >
+        <Plus size={16} />
+      </button>
+    </div>
+  );
+}
+
+// ─── Labelled number input (free text, numeric) ──────────────────────────────
+
+export function NumberInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+  suffix,
+}: {
+  label: string;
+  value: number | '';
+  onChange: (v: number | '') => void;
+  placeholder?: string;
+  suffix?: string;
+}) {
+  return (
+    <label className="block">
+      <span className="eyebrow block mb-1">{label}</span>
+      <div className="relative">
+        <input
+          type="number"
+          inputMode="decimal"
+          value={value}
+          placeholder={placeholder}
+          onChange={e => {
+            const v = e.target.value;
+            onChange(v === '' ? '' : Math.max(0, Number(v)));
+          }}
+          className="input"
+        />
+        {suffix && (
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-slate-500">
+            {suffix}
+          </span>
+        )}
+      </div>
+    </label>
   );
 }
