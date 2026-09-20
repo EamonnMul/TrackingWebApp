@@ -121,7 +121,7 @@ export default function NutritionScreen() {
     if (target.protein > 0 && before.protein < target.protein && after.protein >= target.protein) {
       setCelebrate(true);
       setTimeout(() => setCelebrate(false), 800);
-      flash('Protein target hit. Big dawg energy.');
+      flash('Protein target hit.');
     } else if ((prev?.items.length ?? 0) === 0 && (fresh?.items.length ?? 0) > 0) {
       // First log of the day — the chain continues (count today optimistically;
       // allEntries refreshes in the background).

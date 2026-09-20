@@ -524,8 +524,8 @@ export default function TodayScreen() {
               </>
             ) : (
               <>
-                <p className="text-[15px] font-bold text-success-500">Clean sweep.</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Everything's logged. Go be a big dawg.</p>
+                <p className="text-[15px] font-bold text-success-500">All done.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Everything's logged for today.</p>
               </>
             )}
           </div>

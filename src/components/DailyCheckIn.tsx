@@ -85,9 +85,9 @@ export default function DailyCheckIn({ onDismiss }: { onDismiss: () => void }) {
         <div className="mb-5">
           <p className="text-[11px] font-bold text-violet-500 uppercase tracking-[0.12em] mb-1">Daily Check-In</p>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white leading-snug">
-            Start strong 💪
+            How's today looking?
           </h2>
-          <p className="text-sm text-slate-400 mt-0.5">30 seconds. Let's go.</p>
+          <p className="text-sm text-slate-400 mt-0.5">Takes about 30 seconds.</p>
         </div>
 
         {/* Date toggle */}

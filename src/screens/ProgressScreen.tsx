@@ -480,7 +480,7 @@ export default function ProgressScreen() {
       <div>
         <p className="screen-eyebrow text-cobalt-500">Stats · All Time</p>
         <h1 className="screen-title">Progress</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">The gains don't lie.</p>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Trends across lifting, running, weight and habits.</p>
       </div>
 
       {/* Sub-tabs — drag to reorder */}

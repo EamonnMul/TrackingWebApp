@@ -128,15 +128,17 @@ function SignInPage({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () 
       </button>
 
       <div className="text-center mb-12 animate-fade-in">
-        <p className="eyebrow-fire mb-3">Big Dawg · Built Different</p>
+        <p className="eyebrow text-slate-400 dark:text-slate-500 mb-3">
+          Strength · Running · Nutrition
+        </p>
         <h1 className="text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-[0.95]">
-          Track the<br />
+          Training<br />
           <span className="bg-gradient-to-r from-cobalt-400 to-cobalt-500 bg-clip-text text-transparent">
-            grind.
+            Log
           </span>
         </h1>
         <p className="text-slate-500 dark:text-slate-400 mt-4 text-base">
-          Daily reps. Real habits. No fluff.
+          Lifting, running, habits and nutrition in one place.
         </p>
       </div>
 

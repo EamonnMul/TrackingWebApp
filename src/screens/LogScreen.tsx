@@ -716,7 +716,7 @@ export default function LogScreen() {
     <div className="space-y-4">
       {/* Header */}
       <div>
-        <p className="screen-eyebrow text-cobalt-500">Big Dawg · Today's Grind</p>
+        <p className="screen-eyebrow text-cobalt-500">Training</p>
         <h1 className="screen-title">Log</h1>
         <div className="flex items-center gap-2 mt-2">
           {/* Date pill — transparent date input overlaid so one tap opens native picker */}
@@ -773,7 +773,7 @@ export default function LogScreen() {
                   <button onClick={() => adjustTarget(5)} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-ink-elevated text-slate-700 dark:text-slate-300 text-lg hover:bg-slate-200 dark:hover:bg-ink-elevated transition-colors">+</button>
                 </div>
               )}
-              {targetMet && <p className="text-green-400 text-xs font-semibold mt-2">Target smashed. Big dawg energy.</p>}
+              {targetMet && <p className="text-green-400 text-xs font-semibold mt-2">Daily target hit.</p>}
             </div>
           )}
 
