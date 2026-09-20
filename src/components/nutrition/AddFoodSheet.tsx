@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Search, Zap, PencilLine, Star, Clock, ChevronRight } from 'lucide-react';
+import { Search, Zap, PencilLine, Star, Clock, ChevronRight, BookOpen } from 'lucide-react';
+import { STARTER_FOODS, searchStarterFoods, StarterFood } from '../../data/starterFoods';
 import { BottomSheet, Stepper, NumberInput, EmptyState } from '../ui';
 import {
   getSavedFoods, getRecents, saveSavedFood, bumpSavedFoodUsage, logFood, genId,
 } from '../../utils/nutrition';
-import { scaleServing } from '../../utils/nutritionCalc';
+import { scaleServing, caloriesFromMacros } from '../../utils/nutritionCalc';
 import {
   SavedFood, RecentFood, FoodLog, MealCategory, MEAL_CATEGORIES,
 } from '../../types';
@@ -73,6 +74,17 @@ export default function AddFoodSheet({
     return list.filter(f => !recentKeys.has(f.id) && !recentKeys.has(f.name.toLowerCase())).slice(0, 20);
   }, [savedFoods, query, filteredRecents]);
 
+  // Library (CoFID) results rank below the user's own foods — their data wins.
+  const filteredLibrary = useMemo(() => {
+    const q = query.trim();
+    if (!q) return [];
+    const ownNames = new Set([
+      ...filteredRecents.map(r => r.name.toLowerCase()),
+      ...filteredSaved.map(f => f.name.toLowerCase()),
+    ]);
+    return searchStarterFoods(q, 30).filter(f => !ownNames.has(f.name.toLowerCase()));
+  }, [query, filteredRecents, filteredSaved]);
+
   function pickRecent(r: RecentFood) {
     setCandidate({
       name: r.name, brand: r.brand,
@@ -80,6 +92,18 @@ export default function AddFoodSheet({
       carbsPerServing: r.carbsPerServing, fatPerServing: r.fatPerServing, fibrePerServing: r.fibrePerServing,
       servingSize: r.servingSize, savedFoodId: r.savedFoodId, barcode: r.barcode,
       source: r.savedFoodId ? 'saved_food' : 'manual',
+    });
+    setMode('confirm');
+  }
+
+  function pickLibrary(f: StarterFood) {
+    setCandidate({
+      name: f.name,
+      caloriesPerServing: f.calories, proteinPerServing: f.protein,
+      carbsPerServing: f.carbs, fatPerServing: f.fat,
+      fibrePerServing: f.fibre ?? undefined,
+      servingSize: f.servingLabel,
+      source: 'external_database',
     });
     setMode('confirm');
   }
@@ -105,8 +129,8 @@ export default function AddFoodSheet({
         <BrowseView
           query={query} setQuery={setQuery}
           loading={loading}
-          recents={filteredRecents} saved={filteredSaved}
-          onPickRecent={pickRecent} onPickSaved={pickSaved}
+          recents={filteredRecents} saved={filteredSaved} library={filteredLibrary}
+          onPickRecent={pickRecent} onPickSaved={pickSaved} onPickLibrary={pickLibrary}
           onQuickAdd={() => setMode('quickadd')}
           onManual={() => setMode('manual')}
         />
@@ -197,14 +221,16 @@ export default function AddFoodSheet({
 // ─── Browse ──────────────────────────────────────────────────────────────────
 
 function BrowseView({
-  query, setQuery, loading, recents, saved, onPickRecent, onPickSaved, onQuickAdd, onManual,
+  query, setQuery, loading, recents, saved, library,
+  onPickRecent, onPickSaved, onPickLibrary, onQuickAdd, onManual,
 }: {
   query: string; setQuery: (s: string) => void; loading: boolean;
-  recents: RecentFood[]; saved: SavedFood[];
+  recents: RecentFood[]; saved: SavedFood[]; library: StarterFood[];
   onPickRecent: (r: RecentFood) => void; onPickSaved: (f: SavedFood) => void;
+  onPickLibrary: (f: StarterFood) => void;
   onQuickAdd: () => void; onManual: () => void;
 }) {
-  const nothing = !loading && recents.length === 0 && saved.length === 0;
+  const nothing = !loading && recents.length === 0 && saved.length === 0 && library.length === 0;
   return (
     <div className="space-y-4">
       {/* Search */}
@@ -234,8 +260,10 @@ function BrowseView({
       {nothing && (
         <EmptyState
           icon={Search}
-          title="No saved foods yet"
-          hint="Quick-add or create a food — it'll show up here next time."
+          title={query ? 'Nothing found' : 'No saved foods yet'}
+          hint={query
+            ? `No match for "${query}" in your foods or the library. Quick-add it instead.`
+            : `Search ${STARTER_FOODS.length} common foods, or quick-add your own.`}
         />
       )}
 
@@ -266,6 +294,27 @@ function BrowseView({
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {library.length > 0 && (
+        <div>
+          <p className="section-label flex items-center gap-1.5">
+            <BookOpen size={11} /> Food library
+          </p>
+          <div className="card divide-y divide-slate-100 dark:divide-line overflow-hidden">
+            {library.map(f => (
+              <FoodRow
+                key={f.id} name={f.name}
+                cals={f.calories} protein={f.protein}
+                serving={f.servingLabel} onClick={() => onPickLibrary(f)}
+              />
+            ))}
+          </div>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 px-1">
+            Typical values from UK CoFID. Check the packet for branded items — your
+            edits are saved and take priority next time.
+          </p>
         </div>
       )}
     </div>
@@ -350,6 +399,8 @@ function ManualView({
   const [brand, setBrand] = useState('');
   const [serving, setServing] = useState('');
   const [cals, setCals] = useState<number | ''>('');
+  const [calsDirty, setCalsDirty] = useState(false); // user typed calories manually
+  const [calsFocused, setCalsFocused] = useState(false);
   const [protein, setProtein] = useState<number | ''>('');
   const [carbs, setCarbs] = useState<number | ''>('');
   const [fat, setFat] = useState<number | ''>('');
@@ -358,6 +409,27 @@ function ManualView({
   const [qty, setQty] = useState(1);
   const [saveAsFrequent, setSaveAsFrequent] = useState(true);
   const valid = name.trim() && cals !== '' && Number(cals) > 0;
+
+  // Auto-calc calories from macros (4/4/9) until the user types calories
+  // themselves — then their number wins and we stop syncing. Never write
+  // into the field while it has focus, or we'd fight the user's caret
+  // (clear-then-type-9 would become "1209").
+  const autoCals = caloriesFromMacros({ protein, carbs, fat, fibre });
+  useEffect(() => {
+    if (calsDirty || calsFocused) return;
+    setCals(autoCals > 0 ? autoCals : '');
+  }, [autoCals, calsDirty, calsFocused]);
+
+  function handleCalsChange(v: number | '') {
+    setCals(v);
+    setCalsDirty(v !== '');
+  }
+
+  function handleCalsBlur() {
+    setCalsFocused(false);
+    // Leaving the field empty hands control back to the auto-calc.
+    if (cals === '') setCalsDirty(false);
+  }
 
   return (
     <div className="space-y-4">
@@ -377,12 +449,34 @@ function ManualView({
       </div>
       <p className="eyebrow">Per serving</p>
       <div className="grid grid-cols-2 gap-3">
-        <NumberInput label="Calories" value={cals} onChange={setCals} suffix="kcal" placeholder="0" />
         <NumberInput label="Protein" value={protein} onChange={setProtein} suffix="g" placeholder="0" />
         <NumberInput label="Carbs" value={carbs} onChange={setCarbs} suffix="g" placeholder="0" />
         <NumberInput label="Fat" value={fat} onChange={setFat} suffix="g" placeholder="0" />
         <NumberInput label="Fibre" value={fibre} onChange={setFibre} suffix="g" placeholder="0" />
+        <NumberInput
+          label="Calories"
+          value={cals}
+          onChange={handleCalsChange}
+          onFocus={() => setCalsFocused(true)}
+          onBlur={handleCalsBlur}
+          suffix="kcal"
+          placeholder="0"
+        />
       </div>
+      {!calsDirty && autoCals > 0 && (
+        <p className="text-[11px] text-slate-500 dark:text-slate-400 -mt-2">
+          Calories auto-calculated from macros (P×4 + C×4 + F×9 + fibre×2).
+        </p>
+      )}
+      {calsDirty && autoCals > 0 && autoCals !== Number(cals) && (
+        <button
+          type="button"
+          onClick={() => { setCals(autoCals); setCalsDirty(false); }}
+          className="text-[11px] font-semibold text-cobalt-500 -mt-2 block"
+        >
+          Recalculate from macros → {autoCals} kcal
+        </button>
+      )}
 
       <MealPicker meal={meal} setMeal={setMeal} />
 

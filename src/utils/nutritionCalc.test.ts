@@ -8,6 +8,7 @@ import {
   emptyTotals, sumFoodLogs, remaining, pctOfTarget, round,
   mealComponentTotals, savedMealTotals, hitProteinTarget, withinCalorieTarget,
   averageTotals, scaleServing, weeklyRecommendation,
+  caloriesFromMacros, streakFromDates, calcLoggingStreak, calcProteinStreak,
 } from './nutritionCalc';
 import { FoodLog, NutritionEntry, NutritionTarget, SavedMeal, MealComponent } from '../types';
 
@@ -127,6 +128,78 @@ describe('scaleServing', () => {
   test('quantity 0 falls back to 1', () => {
     const r = scaleServing({ calories: 100, protein: 10 }, 0);
     assert.equal(r.calories, 100);
+  });
+});
+
+describe('caloriesFromMacros (UK/EU label convention)', () => {
+  test('applies 4/4/9 to protein/carbs/fat', () => {
+    assert.equal(caloriesFromMacros({ protein: 30, carbs: 40, fat: 10 }), 30 * 4 + 40 * 4 + 10 * 9);
+  });
+  test('adds fibre at 2 kcal/g (EU 1169/2011 Annex XIV)', () => {
+    assert.equal(caloriesFromMacros({ protein: 0, carbs: 0, fat: 0, fibre: 10 }), 20);
+    assert.equal(
+      caloriesFromMacros({ protein: 20, carbs: 30, fat: 5, fibre: 8 }),
+      20 * 4 + 30 * 4 + 5 * 9 + 8 * 2,
+    );
+  });
+  test('omitted fibre contributes nothing (back-compat)', () => {
+    assert.equal(caloriesFromMacros({ protein: 30, carbs: 40, fat: 10 }),
+                 caloriesFromMacros({ protein: 30, carbs: 40, fat: 10, fibre: 0 }));
+  });
+  test('empty-string inputs count as 0', () => {
+    assert.equal(caloriesFromMacros({ protein: 25, carbs: '', fat: '', fibre: '' }), 100);
+    assert.equal(caloriesFromMacros({ protein: '', carbs: '', fat: '' }), 0);
+  });
+  test('rounds to whole kcal', () => {
+    assert.equal(caloriesFromMacros({ protein: 0.5, carbs: 0, fat: 0.1 }), Math.round(0.5 * 4 + 0.1 * 9));
+  });
+});
+
+describe('streaks', () => {
+  const T = '2024-01-10';
+  const day = (n: number) => {
+    // n days before T, hardcoded around a known date
+    const map: Record<number, string> = {
+      0: '2024-01-10', 1: '2024-01-09', 2: '2024-01-08', 3: '2024-01-07', 4: '2024-01-06',
+    };
+    return map[n];
+  };
+  const e = (date: string, protein: number, hasItems = true): NutritionEntry => ({
+    date, updatedAt: 0,
+    items: hasItems ? [log({ protein, calories: 100 })] : [],
+  });
+
+  test('streakFromDates counts consecutive days ending today', () => {
+    assert.equal(streakFromDates(new Set([day(0), day(1), day(2)]), T), 3);
+  });
+  test('today-in-progress grace: today missing starts from yesterday', () => {
+    assert.equal(streakFromDates(new Set([day(1), day(2)]), T), 2);
+  });
+  test('gap breaks the streak', () => {
+    assert.equal(streakFromDates(new Set([day(0), day(2), day(3)]), T), 1);
+  });
+  test('empty set → 0', () => {
+    assert.equal(streakFromDates(new Set<string>(), T), 0);
+  });
+
+  test('calcLoggingStreak ignores empty days', () => {
+    const entries = [e(day(0), 10), e(day(1), 10), e(day(2), 0, false)]; // day-2 exists but empty
+    assert.equal(calcLoggingStreak(entries, T), 2);
+  });
+
+  test('calcProteinStreak counts only days hitting target', () => {
+    const tgt = target({ protein: 150 });
+    const entries = [e(day(0), 160), e(day(1), 155), e(day(2), 120), e(day(3), 180)];
+    assert.equal(calcProteinStreak(entries, tgt, T), 2); // day-2 missed → chain ends
+  });
+  test('calcProteinStreak grace: today below target does not break yesterday run', () => {
+    const tgt = target({ protein: 150 });
+    const entries = [e(day(0), 40), e(day(1), 155), e(day(2), 170)];
+    assert.equal(calcProteinStreak(entries, tgt, T), 2);
+  });
+  test('calcProteinStreak zero/absent target → 0', () => {
+    assert.equal(calcProteinStreak([e(day(0), 200)], null, T), 0);
+    assert.equal(calcProteinStreak([e(day(0), 200)], target({ protein: 0 }), T), 0);
   });
 });
 

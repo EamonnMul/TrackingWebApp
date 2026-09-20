@@ -331,12 +331,16 @@ export function NumberInput({
   onChange,
   placeholder,
   suffix,
+  onFocus,
+  onBlur,
 }: {
   label: string;
   value: number | '';
   onChange: (v: number | '') => void;
   placeholder?: string;
   suffix?: string;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }) {
   return (
     <label className="block">
@@ -351,6 +355,8 @@ export function NumberInput({
             const v = e.target.value;
             onChange(v === '' ? '' : Math.max(0, Number(v)));
           }}
+          onFocus={onFocus}
+          onBlur={onBlur}
           className="input"
         />
         {suffix && (

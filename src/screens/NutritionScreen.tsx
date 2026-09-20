@@ -11,7 +11,7 @@ import AddFoodSheet from '../components/nutrition/AddFoodSheet';
 import SavedMealSheet from '../components/nutrition/SavedMealSheet';
 import NutritionTargetSheet from '../components/nutrition/NutritionTargetSheet';
 import {
-  getNutritionEntry, getNutritionTarget, getNutritionEntriesInRange,
+  getNutritionEntry, getNutritionTarget, getAllNutritionEntries,
   deleteFoodLog, updateFoodLog, copyDay, getTodayString,
 } from '../utils/nutrition';
 import {
@@ -20,6 +20,7 @@ import {
 import { addDaysLocal } from '../utils/habitStreak';
 import {
   sumFoodLogs, remaining, pctOfTarget, averageTotals, round,
+  calcLoggingStreak, calcProteinStreak,
 } from '../utils/nutritionCalc';
 import {
   NutritionEntry, NutritionTarget, FoodLog, MealCategory, MEAL_CATEGORIES,
@@ -39,6 +40,7 @@ export default function NutritionScreen() {
 
   // Week + weight snapshot (loads after first paint)
   const [weekEntries, setWeekEntries] = useState<NutritionEntry[] | null>(null);
+  const [allEntries, setAllEntries] = useState<NutritionEntry[]>([]);
   const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [weightUnit, setWeightUnit] = useState<WeightUnit>('kg');
 
@@ -49,6 +51,9 @@ export default function NutritionScreen() {
   const [addMeal, setAddMeal] = useState<MealCategory>('breakfast');
   const [editing, setEditing] = useState<FoodLog | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  // Engagement: ring pulse when protein target is crossed; pop-in for new rows
+  const [celebrate, setCelebrate] = useState(false);
+  const [newIds, setNewIds] = useState<Set<string>>(new Set());
 
   const isToday = date === today;
 
@@ -61,19 +66,25 @@ export default function NutritionScreen() {
 
   useEffect(() => { setLoading(true); loadDay(); }, [loadDay]);
 
-  // Week/weight snapshot
+  // Week/weight/streak snapshot — one fetch of all entries powers the 7-day
+  // strip AND the streak chips (getNutritionEntriesInRange reads the whole
+  // collection anyway, so this is the same cost with more mileage).
   useEffect(() => {
     if (loading) return;
     let cancelled = false;
     (async () => {
       const weekStart = addDaysLocal(date, -6);
-      const [week, w, unit] = await Promise.all([
-        getNutritionEntriesInRange(weekStart, date),
+      const [all, w, unit] = await Promise.all([
+        getAllNutritionEntries(),
         getAllWeightEntries(),
         getWeightUnit(),
       ]);
       if (cancelled) return;
-      setWeekEntries(week);
+      setAllEntries(all);
+      setWeekEntries(
+        all.filter(e => e.date >= weekStart && e.date <= date)
+          .sort((a, b) => a.date.localeCompare(b.date))
+      );
       setWeights([...w].sort((a, b) => a.date.localeCompare(b.date)));
       setWeightUnit(unit);
     })();
@@ -83,6 +94,44 @@ export default function NutritionScreen() {
   function flash(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(t => (t === msg ? null : t)), 2500);
+  }
+
+  /**
+   * Post-log refresh with celebration. Diffs totals before/after so hitting
+   * the protein target or starting the day's chain gets a satisfying beat —
+   * calm copy, no shame on the flip side.
+   */
+  async function handleLogged() {
+    const prev = entry;
+    const fresh = await getNutritionEntry(date);
+    setEntry(fresh);
+
+    // Pop-in animation for the just-added rows.
+    const prevIds = new Set((prev?.items ?? []).map(i => i.id));
+    const added = (fresh?.items ?? []).filter(i => !prevIds.has(i.id)).map(i => i.id);
+    if (added.length > 0) {
+      setNewIds(new Set(added));
+      setTimeout(() => setNewIds(new Set()), 1000);
+    }
+
+    if (!isToday || !target) return;
+    const before = sumFoodLogs(prev?.items ?? []);
+    const after = sumFoodLogs(fresh?.items ?? []);
+
+    if (target.protein > 0 && before.protein < target.protein && after.protein >= target.protein) {
+      setCelebrate(true);
+      setTimeout(() => setCelebrate(false), 800);
+      flash('Protein target hit. Big dawg energy.');
+    } else if ((prev?.items.length ?? 0) === 0 && (fresh?.items.length ?? 0) > 0) {
+      // First log of the day — the chain continues (count today optimistically;
+      // allEntries refreshes in the background).
+      const dates = new Set(allEntries.filter(e => e.items.length > 0).map(e => e.date));
+      dates.add(today);
+      let streak = 0;
+      let cursor = today;
+      while (dates.has(cursor)) { streak++; cursor = addDaysLocal(cursor, -1); }
+      flash(streak > 1 ? `${streak} days in a row. Keep the chain alive.` : 'Day one on the board.');
+    }
   }
 
   async function handleCopyYesterday() {
@@ -134,6 +183,10 @@ export default function NutritionScreen() {
   // Weight trend
   const latestWeight = weights.length > 0 ? weights[weights.length - 1] : null;
 
+  // Streaks — always anchored to today, shown only on the today view.
+  const logStreak = calcLoggingStreak(allEntries, today);
+  const proteinStreak = calcProteinStreak(allEntries, target, today);
+
   return (
     <div className="space-y-5">
       <Header date={date} today={today} onPrev={() => setDate(addDaysLocal(date, -1))} onNext={() => setDate(addDaysLocal(date, 1))} isToday={isToday} onSettings={() => setShowTargets(true)} />
@@ -151,12 +204,31 @@ export default function NutritionScreen() {
           <RingStat
             pct={proPct}
             accent
+            pulse={celebrate}
             icon={<Beef size={14} className="text-cobalt-500" />}
             value={String(Math.round(totals.protein))}
             label="g protein"
             sub={`${Math.round(proLeft)}g left`}
           />
         </div>
+
+        {/* Streak chips — the chain you don't want to break */}
+        {isToday && (logStreak > 0 || proteinStreak > 0) && (
+          <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-line">
+            {logStreak > 0 && (
+              <span className="chip-fire">
+                <Flame size={10} strokeWidth={2.5} />
+                <span className="tabular">{logStreak}d logged</span>
+              </span>
+            )}
+            {proteinStreak > 0 && (
+              <span className="chip-success">
+                <Beef size={10} strokeWidth={2.5} />
+                <span className="tabular">{proteinStreak}d protein</span>
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Optional macros */}
         {target.showMacros && (
@@ -228,7 +300,9 @@ export default function NutritionScreen() {
                     <button
                       key={it.id}
                       onClick={() => setEditing(it)}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-slate-50 dark:active:bg-ink-elevated transition-colors"
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left active:bg-slate-50 dark:active:bg-ink-elevated transition-colors ${
+                        newIds.has(it.id) ? 'animate-pop-in' : ''
+                      }`}
                     >
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
@@ -248,8 +322,8 @@ export default function NutritionScreen() {
       )}
 
       {/* Sheets */}
-      <AddFoodSheet open={showAdd} onClose={() => setShowAdd(false)} date={date} defaultMeal={addMeal} onLogged={loadDay} />
-      <SavedMealSheet open={showMeals} onClose={() => setShowMeals(false)} date={date} onLogged={loadDay} />
+      <AddFoodSheet open={showAdd} onClose={() => setShowAdd(false)} date={date} defaultMeal={addMeal} onLogged={handleLogged} />
+      <SavedMealSheet open={showMeals} onClose={() => setShowMeals(false)} date={date} onLogged={handleLogged} />
       <NutritionTargetSheet open={showTargets} onClose={() => setShowTargets(false)} onSaved={loadDay} />
 
       {/* Edit/delete a logged item */}
@@ -295,12 +369,12 @@ function Header({
 }
 
 function RingStat({
-  pct, value, label, sub, icon, accent,
+  pct, value, label, sub, icon, accent, pulse,
 }: {
-  pct: number; value: string; label: string; sub: string; icon: React.ReactNode; accent?: boolean;
+  pct: number; value: string; label: string; sub: string; icon: React.ReactNode; accent?: boolean; pulse?: boolean;
 }) {
   return (
-    <div className="flex flex-col items-center">
+    <div className={`flex flex-col items-center ${pulse ? 'animate-habit-bump' : ''}`}>
       <ProgressRing pct={pct} size={96} stroke={7}>
         <div className="flex flex-col items-center">
           <span className="tabular text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-none">{value}</span>

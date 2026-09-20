@@ -4,7 +4,7 @@ import { BottomSheet, NumberInput, EmptyState } from '../ui';
 import {
   getSavedMeals, saveSavedMeal, deleteSavedMeal, bumpSavedMealUsage, logManyFoods, genId,
 } from '../../utils/nutrition';
-import { mealComponentTotals } from '../../utils/nutritionCalc';
+import { mealComponentTotals, caloriesFromMacros } from '../../utils/nutritionCalc';
 import {
   SavedMeal, MealComponent, FoodLog, MealCategory, MEAL_CATEGORIES,
 } from '../../types';
@@ -151,18 +151,41 @@ function CreateMealView({
   const [components, setComponents] = useState<MealComponent[]>([]);
   const [cName, setCName] = useState('');
   const [cCals, setCCals] = useState<number | ''>('');
+  const [cCalsDirty, setCCalsDirty] = useState(false);
+  const [cCalsFocused, setCCalsFocused] = useState(false);
   const [cProtein, setCProtein] = useState<number | ''>('');
+  const [cCarbs, setCCarbs] = useState<number | ''>('');
+  const [cFat, setCFat] = useState<number | ''>('');
+  const [cFibre, setCFibre] = useState<number | ''>('');
 
   const total = mealComponentTotals(components);
   const canAdd = cName.trim() && cCals !== '' && Number(cCals) > 0;
   const canSave = name.trim() && components.length > 0;
 
+  // Auto-calc calories from macros until the user types calories directly.
+  // Never write while the field has focus, or we'd fight the user's caret.
+  const cAuto = caloriesFromMacros({ protein: cProtein, carbs: cCarbs, fat: cFat, fibre: cFibre });
+  useEffect(() => {
+    if (cCalsDirty || cCalsFocused) return;
+    setCCals(cAuto > 0 ? cAuto : '');
+  }, [cAuto, cCalsDirty, cCalsFocused]);
+
+  function handleCCalsBlur() {
+    setCCalsFocused(false);
+    if (cCals === '') setCCalsDirty(false);
+  }
+
   function addComponent() {
     if (!canAdd) return;
     setComponents(prev => [...prev, {
-      name: cName.trim(), calories: Number(cCals), protein: Number(cProtein) || 0, quantity: 1,
+      name: cName.trim(), calories: Number(cCals), protein: Number(cProtein) || 0,
+      carbs: cCarbs === '' ? undefined : Number(cCarbs),
+      fat: cFat === '' ? undefined : Number(cFat),
+      fibre: cFibre === '' ? undefined : Number(cFibre),
+      quantity: 1,
     }]);
-    setCName(''); setCCals(''); setCProtein('');
+    setCName(''); setCCals(''); setCCalsDirty(false);
+    setCProtein(''); setCCarbs(''); setCFat(''); setCFibre('');
   }
 
   return (
@@ -199,9 +222,25 @@ function CreateMealView({
         <p className="eyebrow">Add item</p>
         <input value={cName} onChange={e => setCName(e.target.value)} placeholder="Food name" className="input" />
         <div className="grid grid-cols-2 gap-3">
-          <NumberInput label="Calories" value={cCals} onChange={setCCals} suffix="kcal" placeholder="0" />
           <NumberInput label="Protein" value={cProtein} onChange={setCProtein} suffix="g" placeholder="0" />
+          <NumberInput label="Carbs" value={cCarbs} onChange={setCCarbs} suffix="g" placeholder="0" />
+          <NumberInput label="Fat" value={cFat} onChange={setCFat} suffix="g" placeholder="0" />
+          <NumberInput label="Fibre" value={cFibre} onChange={setCFibre} suffix="g" placeholder="0" />
+          <NumberInput
+            label="Calories"
+            value={cCals}
+            onChange={v => { setCCals(v); setCCalsDirty(v !== ''); }}
+            onFocus={() => setCCalsFocused(true)}
+            onBlur={handleCCalsBlur}
+            suffix="kcal"
+            placeholder="0"
+          />
         </div>
+        {!cCalsDirty && cAuto > 0 && (
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            Calories auto-calculated from macros.
+          </p>
+        )}
         <button disabled={!canAdd} onClick={addComponent} className="btn-secondary w-full justify-center gap-1.5">
           <Plus size={14} /> Add item
         </button>

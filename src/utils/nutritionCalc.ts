@@ -10,6 +10,7 @@ import {
   NutritionTarget,
   SavedMeal,
 } from '../types';
+import { addDaysLocal } from './habitStreak';
 
 export interface MacroTotals {
   calories: number;
@@ -135,6 +136,78 @@ export function scaleServing(
   if (perServing.fat != null) out.fat = round(perServing.fat * q);
   if (perServing.fibre != null) out.fibre = round(perServing.fibre * q);
   return out;
+}
+
+// ─── Macro → calorie estimation (Atwater factors) ───────────────────────────
+
+/**
+ * Estimate calories from macros using the UK/EU label convention
+ * (Regulation 1169/2011, Annex XIV):
+ *   protein 4 · carbohydrate 4 · fat 9 · fibre 2 kcal per gram.
+ *
+ * "Carbohydrate" here means AVAILABLE carbohydrate as declared on a UK/EU
+ * label — i.e. fibre is NOT inside it, which is why fibre gets its own term.
+ * (US "total carbohydrate" does include fibre; applying this formula to a US
+ * label would double-count it. The app standardises on the UK convention.)
+ *
+ * This is for MANUAL ENTRY only — someone typing numbers off a packet. Foods
+ * from the CoFID-sourced library carry their own published energy value and
+ * are never recalculated through here, because CoFID computes energy with a
+ * different factor set (3.75 kcal/g for carbohydrate expressed as
+ * monosaccharide equivalents).
+ *
+ * Accepts '' (empty inputs) as 0 so forms can call it directly.
+ */
+export function caloriesFromMacros(m: {
+  protein?: number | '';
+  carbs?: number | '';
+  fat?: number | '';
+  fibre?: number | '';
+}): number {
+  const p = Number(m.protein) || 0;
+  const c = Number(m.carbs) || 0;
+  const f = Number(m.fat) || 0;
+  const fib = Number(m.fibre) || 0;
+  return Math.round(p * 4 + c * 4 + f * 9 + fib * 2);
+}
+
+// ─── Streaks (the daily-loop hook) ───────────────────────────────────────────
+
+/**
+ * Consecutive-day count ending at `today`, walking backward through `dates`.
+ * "Today in progress" grace: if today isn't in the set yet, the walk starts
+ * from yesterday — an unfinished today shouldn't break yesterday's chain
+ * (same semantics as habitStreak.calculateStreak).
+ */
+export function streakFromDates(dates: ReadonlySet<string>, today: string, maxLookback = 3650): number {
+  let cursor = dates.has(today) ? today : addDaysLocal(today, -1);
+  let streak = 0;
+  while (dates.has(cursor) && streak < maxLookback) {
+    streak++;
+    cursor = addDaysLocal(cursor, -1);
+  }
+  return streak;
+}
+
+/** Consecutive days (ending today) with at least one food logged. */
+export function calcLoggingStreak(entries: NutritionEntry[], today: string): number {
+  const dates = new Set(entries.filter(e => e.items.length > 0).map(e => e.date));
+  return streakFromDates(dates, today);
+}
+
+/** Consecutive days (ending today) where the protein target was hit. */
+export function calcProteinStreak(
+  entries: NutritionEntry[],
+  target: NutritionTarget | null,
+  today: string,
+): number {
+  if (!target || target.protein <= 0) return 0;
+  const dates = new Set(
+    entries
+      .filter(e => sumFoodLogs(e.items).protein >= target.protein)
+      .map(e => e.date),
+  );
+  return streakFromDates(dates, today);
 }
 
 /**
