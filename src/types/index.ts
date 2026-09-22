@@ -246,6 +246,11 @@ export interface FoodLog {
   fibre?: number;         // grams
   servingSize?: string;   // human label, e.g. "1 scoop (30g)"
   quantity: number;       // multiplier applied to the base serving
+  /** Weight of ONE base serving in grams, when known. Lets the entry be
+   *  re-edited by weight rather than by serving multiplier. */
+  servingGrams?: number;
+  /** Total grams actually consumed, when the user logged by weight. */
+  grams?: number;
   loggedAt: number;       // unix ms
   source: FoodSource;
   savedFoodId?: string;   // provenance only — never read for nutrition values
@@ -270,6 +275,7 @@ export interface SavedFood {
   fatPerServing?: number;
   fibrePerServing?: number;
   servingSize?: string;   // human label for one serving
+  servingGrams?: number;  // weight of one serving in grams, when known
   barcode?: string;
   usageCount: number;
   lastUsedAt: number;
@@ -326,6 +332,7 @@ export interface RecentFood {
   fatPerServing?: number;
   fibrePerServing?: number;
   servingSize?: string;
+  servingGrams?: number;
   savedFoodId?: string;
   barcode?: string;
   lastUsedAt: number;

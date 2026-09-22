@@ -221,7 +221,13 @@ async function pushRecentFromLog(log: FoodLog): Promise<void> {
     carbsPerServing: log.carbs != null ? round(log.carbs / q) : undefined,
     fatPerServing: log.fat != null ? round(log.fat / q) : undefined,
     fibrePerServing: log.fibre != null ? round(log.fibre / q) : undefined,
-    servingSize: log.servingSize,
+    // When the log was made by weight its servingSize reads like "173g", which
+    // describes that one meal, not the base serving the per-serving values above
+    // refer to. Fall back to the base weight so label and numbers agree.
+    servingSize: log.grams != null && log.servingGrams
+      ? `${log.servingGrams}g`
+      : log.servingSize,
+    servingGrams: log.servingGrams,
     savedFoodId: log.savedFoodId,
     barcode: log.barcode,
     lastUsedAt: Date.now(),

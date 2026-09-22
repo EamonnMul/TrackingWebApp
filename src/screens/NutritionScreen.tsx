@@ -437,10 +437,18 @@ function EditLogSheet({
   onDelete: (logId: string) => void;
 }) {
   const [qty, setQty] = useState(1);
+  const [grams, setGrams] = useState(100);
+  const [gramStep, setGramStep] = useState(10);
+  const [byWeight, setByWeight] = useState(false);
   const [meal, setMeal] = useState<MealCategory>('breakfast');
 
   useEffect(() => {
-    if (log) { setQty(log.quantity || 1); setMeal(log.meal); }
+    if (!log) return;
+    setQty(log.quantity || 1);
+    setMeal(log.meal);
+    const canWeigh = !!log.servingGrams && log.servingGrams > 0;
+    setByWeight(canWeigh);
+    setGrams(log.grams ?? (canWeigh ? Math.round(log.servingGrams! * (log.quantity || 1)) : 100));
   }, [log]);
 
   if (!log) return null;
@@ -454,18 +462,23 @@ function EditLogSheet({
   const perFat = current.fat != null ? current.fat / baseQty : undefined;
   const perFibre = current.fibre != null ? current.fibre / baseQty : undefined;
 
-  const newCal = Math.round(perCal * qty);
-  const newPro = round(perPro * qty);
+  const canWeigh = !!current.servingGrams && current.servingGrams > 0;
+  const effQty = byWeight && canWeigh ? grams / current.servingGrams! : qty;
+
+  const newCal = Math.round(perCal * effQty);
+  const newPro = round(perPro * effQty);
 
   function save() {
     const patch: Partial<FoodLog> = {
-      quantity: qty, meal,
-      calories: Math.round(perCal * qty),
-      protein: round(perPro * qty),
+      quantity: effQty, meal,
+      calories: Math.round(perCal * effQty),
+      protein: round(perPro * effQty),
+      grams: byWeight && canWeigh ? grams : undefined,
+      servingSize: byWeight && canWeigh ? `${grams}g` : current.servingSize,
     };
-    if (perCarbs != null) patch.carbs = round(perCarbs * qty);
-    if (perFat != null) patch.fat = round(perFat * qty);
-    if (perFibre != null) patch.fibre = round(perFibre * qty);
+    if (perCarbs != null) patch.carbs = round(perCarbs * effQty);
+    if (perFat != null) patch.fat = round(perFat * effQty);
+    if (perFibre != null) patch.fibre = round(perFibre * effQty);
     onSave(current.id, patch);
   }
 
@@ -487,8 +500,49 @@ function EditLogSheet({
           <div><span className="tabular text-xl font-extrabold text-cobalt-500">{newPro}</span><span className="text-xs font-bold text-slate-500 ml-1">g protein</span></div>
         </div>
         <div>
-          <span className="eyebrow block mb-1.5">Servings</span>
-          <Stepper value={qty} onChange={setQty} step={0.5} min={0.5} suffix="×" />
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="eyebrow">Amount</span>
+            {canWeigh && (
+              <div className="flex bg-slate-100 dark:bg-ink-inset rounded-lg p-0.5 gap-0.5">
+                {([['Weight', true], ['Servings', false]] as const).map(([label, w]) => (
+                  <button
+                    key={label}
+                    onClick={() => setByWeight(w)}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors ${
+                      byWeight === w
+                        ? 'bg-white dark:bg-ink-elevated text-slate-900 dark:text-white shadow-sm'
+                        : 'text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {byWeight && canWeigh ? (
+            <div className="space-y-2">
+              <Stepper value={grams} onChange={setGrams} step={gramStep} min={gramStep} suffix="g" />
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">Step</span>
+                {[1, 10, 50, 100].map(st => (
+                  <button
+                    key={st}
+                    onClick={() => setGramStep(st)}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                      gramStep === st
+                        ? 'bg-cobalt-500/15 border-cobalt-500/40 text-cobalt-500'
+                        : 'bg-slate-100 dark:bg-ink-inset border-slate-200 dark:border-line text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {st}g
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Stepper value={qty} onChange={setQty} step={0.5} min={0.5} suffix="×" />
+          )}
         </div>
         <div>
           <span className="eyebrow block mb-1.5">Meal</span>

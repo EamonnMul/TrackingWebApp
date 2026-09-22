@@ -22,6 +22,8 @@ interface Candidate {
   fatPerServing?: number;
   fibrePerServing?: number;
   servingSize?: string;
+  /** Weight of one serving in grams — enables logging by weight. */
+  servingGrams?: number;
   savedFoodId?: string;
   barcode?: string;
   source: FoodLog['source'];
@@ -90,7 +92,8 @@ export default function AddFoodSheet({
       name: r.name, brand: r.brand,
       caloriesPerServing: r.caloriesPerServing, proteinPerServing: r.proteinPerServing,
       carbsPerServing: r.carbsPerServing, fatPerServing: r.fatPerServing, fibrePerServing: r.fibrePerServing,
-      servingSize: r.servingSize, savedFoodId: r.savedFoodId, barcode: r.barcode,
+      servingSize: r.servingSize, servingGrams: r.servingGrams,
+      savedFoodId: r.savedFoodId, barcode: r.barcode,
       source: r.savedFoodId ? 'saved_food' : 'manual',
     });
     setMode('confirm');
@@ -103,6 +106,7 @@ export default function AddFoodSheet({
       carbsPerServing: f.carbs, fatPerServing: f.fat,
       fibrePerServing: f.fibre ?? undefined,
       servingSize: f.servingLabel,
+      servingGrams: f.servingGrams,
       source: 'external_database',
     });
     setMode('confirm');
@@ -113,7 +117,8 @@ export default function AddFoodSheet({
       name: f.name, brand: f.brand,
       caloriesPerServing: f.caloriesPerServing, proteinPerServing: f.proteinPerServing,
       carbsPerServing: f.carbsPerServing, fatPerServing: f.fatPerServing, fibrePerServing: f.fibrePerServing,
-      servingSize: f.servingSize, savedFoodId: f.id, barcode: f.barcode,
+      servingSize: f.servingSize, servingGrams: f.servingGrams,
+      savedFoodId: f.id, barcode: f.barcode,
       source: 'saved_food',
     });
     setMode('confirm');
@@ -194,7 +199,7 @@ export default function AddFoodSheet({
           defaultMeal={defaultMeal}
           busy={busy}
           onBack={() => setMode('browse')}
-          onSubmit={async ({ quantity, meal }) => {
+          onSubmit={async ({ quantity, meal, grams }) => {
             setBusy(true);
             const scaled = scaleServing(
               { calories: candidate.caloriesPerServing, protein: candidate.proteinPerServing, carbs: candidate.carbsPerServing, fat: candidate.fatPerServing, fibre: candidate.fibrePerServing },
@@ -202,7 +207,13 @@ export default function AddFoodSheet({
             );
             const log: FoodLog = {
               id: genId(), name: candidate.name, brand: candidate.brand, meal,
-              ...scaled, servingSize: candidate.servingSize, quantity,
+              ...scaled,
+              // When logged by weight, show the weight rather than a fractional
+              // multiple of a serving nobody measured.
+              servingSize: grams != null ? `${grams}g` : candidate.servingSize,
+              quantity,
+              servingGrams: candidate.servingGrams,
+              grams,
               loggedAt: Date.now(), source: candidate.source,
               savedFoodId: candidate.savedFoodId, barcode: candidate.barcode,
             };
@@ -522,12 +533,28 @@ function ConfirmView({
   defaultMeal: MealCategory;
   busy: boolean;
   onBack: () => void;
-  onSubmit: (v: { quantity: number; meal: MealCategory }) => void;
+  onSubmit: (v: { quantity: number; meal: MealCategory; grams?: number }) => void;
 }) {
+  const servingGrams = candidate.servingGrams;
+  const canWeigh = !!servingGrams && servingGrams > 0;
+
+  // Two ways to say how much you ate. Weighing is the accurate one, so it
+  // leads whenever we know what a serving weighs.
+  const [byWeight, setByWeight] = useState(canWeigh);
   const [qty, setQty] = useState(1);
+  const [grams, setGrams] = useState(servingGrams ?? 100);
+  const [gramStep, setGramStep] = useState(10);
   const [meal, setMeal] = useState<MealCategory>(defaultMeal);
-  const cals = Math.round(candidate.caloriesPerServing * qty);
-  const protein = Math.round(candidate.proteinPerServing * qty * 10) / 10;
+
+  // Everything downstream works in serving multiples, so weight just converts.
+  const effectiveQty = byWeight && canWeigh ? grams / servingGrams! : qty;
+
+  const cals = Math.round(candidate.caloriesPerServing * effectiveQty);
+  const protein = Math.round(candidate.proteinPerServing * effectiveQty * 10) / 10;
+  const carbs = candidate.carbsPerServing != null
+    ? Math.round(candidate.carbsPerServing * effectiveQty * 10) / 10 : null;
+  const fat = candidate.fatPerServing != null
+    ? Math.round(candidate.fatPerServing * effectiveQty * 10) / 10 : null;
 
   return (
     <div className="space-y-4">
@@ -548,18 +575,81 @@ function ConfirmView({
             <span className="text-xs font-bold text-slate-500 ml-1">g protein</span>
           </div>
         </div>
+        {(carbs != null || fat != null) && (
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5 tabular">
+            {carbs != null ? `${carbs}g carbs` : ''}
+            {carbs != null && fat != null ? ' · ' : ''}
+            {fat != null ? `${fat}g fat` : ''}
+          </p>
+        )}
       </div>
 
+      {/* How much? */}
       <div>
-        <span className="eyebrow block mb-1.5">Servings</span>
-        <Stepper value={qty} onChange={setQty} step={0.5} min={0.5} suffix="×" />
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="eyebrow">Amount</span>
+          {canWeigh && (
+            <div className="flex bg-slate-100 dark:bg-ink-inset rounded-lg p-0.5 gap-0.5">
+              {([['Weight', true], ['Servings', false]] as const).map(([label, w]) => (
+                <button
+                  key={label}
+                  onClick={() => setByWeight(w)}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors ${
+                    byWeight === w
+                      ? 'bg-white dark:bg-ink-elevated text-slate-900 dark:text-white shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {byWeight && canWeigh ? (
+          <div className="space-y-2">
+            <Stepper value={grams} onChange={setGrams} step={gramStep} min={gramStep} suffix="g" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">Step</span>
+              {[1, 10, 50, 100].map(st => (
+                <button
+                  key={st}
+                  onClick={() => setGramStep(st)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                    gramStep === st
+                      ? 'bg-cobalt-500/15 border-cobalt-500/40 text-cobalt-500'
+                      : 'bg-slate-100 dark:bg-ink-inset border-slate-200 dark:border-line text-slate-500 dark:text-slate-400'
+                  }`}
+                >
+                  {st}g
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">
+              {candidate.servingSize
+                ? `Serving is ${servingGrams}g — ${candidate.servingSize}`
+                : `Serving is ${servingGrams}g`}
+            </p>
+          </div>
+        ) : (
+          <Stepper value={qty} onChange={setQty} step={0.5} min={0.5} suffix="×" />
+        )}
       </div>
 
       <MealPicker meal={meal} setMeal={setMeal} />
 
       <div className="flex gap-2 pt-1">
         <button onClick={onBack} className="btn-ghost flex-1">Back</button>
-        <button disabled={busy} onClick={() => onSubmit({ quantity: qty, meal })} className="btn-primary flex-1">
+        <button
+          disabled={busy}
+          onClick={() => onSubmit({
+            quantity: effectiveQty,
+            meal,
+            grams: byWeight && canWeigh ? grams : undefined,
+          })}
+          className="btn-primary flex-1"
+        >
           {busy ? 'Logging…' : 'Log food'}
         </button>
       </div>
