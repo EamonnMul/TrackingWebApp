@@ -202,6 +202,26 @@ export interface WorkoutTemplate {
   exercises: PlannedExercise[];
 }
 
+/** How a planned run is meant to feel — drives colour and sort emphasis. */
+export type RunType = 'easy' | 'long' | 'tempo' | 'intervals' | 'recovery';
+
+/**
+ * A run scheduled in advance. Mirrors WorkoutPlan's lifecycle (planned → done)
+ * so the schedule can treat lifting and running uniformly.
+ */
+export interface PlannedRun {
+  id: string;
+  date: string;              // 'YYYY-MM-DD' — planned runs are always dated
+  distanceKm: number;
+  runType: RunType;
+  notes?: string;
+  status: 'planned' | 'done';
+  createdAt: number;
+  completedAt?: number;
+  /** id of the RunEntry created when this was marked done */
+  loggedRunId?: string;
+}
+
 export interface WorkoutPlan {
   id: string;
   name: string;

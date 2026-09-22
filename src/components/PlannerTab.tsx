@@ -6,8 +6,12 @@ import {
   saveSetForExercise, getAllExercises, saveExercise,
   getTodayString,
   DEFAULT_EXERCISE_ID,
+  getAllPlannedRuns, savePlannedRun, saveRun,
 } from '../utils/storage';
-import { WorkoutPlan, PlannedExercise, WorkoutSet, Exercise } from '../types';
+import { WorkoutPlan, PlannedExercise, WorkoutSet, Exercise, PlannedRun, RunEntry } from '../types';
+import ScheduleView, { weekStart } from './planner/ScheduleView';
+import RunPlanSheet from './planner/RunPlanSheet';
+import { addDaysLocal } from '../utils/habitStreak';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -195,13 +199,17 @@ function ActiveWorkout({ plan, onFinish, onCancel }: {
 
 // ─── Builder ──────────────────────────────────────────────────────────────────
 
-function WorkoutBuilder({ initial, onSave, onCancel }: {
+function WorkoutBuilder({ initial, initialDate, onSave, onCancel }: {
   initial?: WorkoutPlan;
+  /** Pre-fill the date when planning from a specific day in the schedule. */
+  initialDate?: string;
   onSave: (plan: WorkoutPlan) => void;
   onCancel: () => void;
 }) {
   const [name, setName] = useState(initial?.name ?? '');
-  const [date, setDate] = useState(initial?.date ?? '');
+  // initialDate is for NEW plans only; an existing plan keeps its own date
+  // (or stays undated) rather than inheriting the last-tapped schedule day.
+  const [date, setDate] = useState(initial ? (initial.date ?? '') : (initialDate ?? ''));
   const [exercises, setExercises] = useState<PlannedExercise[]>(
     initial?.exercises.length ? initial.exercises : [newExercise()]
   );
@@ -366,11 +374,22 @@ function WorkoutBuilder({ initial, onSave, onCancel }: {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-type View = 'list' | 'builder' | 'active';
+type View = 'schedule' | 'list' | 'builder' | 'active';
 
 export default function PlannerTab() {
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
-  const [view, setView] = useState<View>('list');
+  // Planning mode is the default: what's coming up matters more than a
+  // flat backlog of everything ever planned.
+  const [view, setView] = useState<View>('schedule');
+  const [plannedRuns, setPlannedRuns] = useState<PlannedRun[]>([]);
+  const [anchorDate, setAnchorDate] = useState(getTodayString());
+  const [runSheetDate, setRunSheetDate] = useState<string | null>(null);
+  const [editingRun, setEditingRun] = useState<PlannedRun | null>(null);
+  const [loggingRun, setLoggingRun] = useState<PlannedRun | null>(null);
+  const [builderDate, setBuilderDate] = useState<string | undefined>(undefined);
+  // Where to return after the builder / active workout finishes, so planning
+  // mode isn't exited every time you successfully add something.
+  const [returnTo, setReturnTo] = useState<View>('schedule');
   const [editing, setEditing] = useState<WorkoutPlan | undefined>(undefined);
   const [activeWorkout, setActiveWorkout] = useState<WorkoutPlan | null>(null);
   const [listTab, setListTab] = useState<'planned' | 'done'>('planned');
@@ -378,8 +397,49 @@ export default function PlannerTab() {
   useEffect(() => { load(); }, []);
 
   async function load() {
-    const all = await getAllWorkoutPlans();
-    setPlans(all.sort((a, b) => (a.date ?? '').localeCompare(b.date ?? '') || b.createdAt - a.createdAt));
+    try {
+      const [all, runs] = await Promise.all([
+        getAllWorkoutPlans(),
+        // Degrade to an empty plan rather than blanking the whole planner.
+        getAllPlannedRuns().catch(() => [] as PlannedRun[]),
+      ]);
+      setPlans(all.sort((a, b) => (a.date ?? '').localeCompare(b.date ?? '') || b.createdAt - a.createdAt));
+      setPlannedRuns(runs);
+    } catch (e) {
+      console.error('planner load failed', e);
+    }
+  }
+
+  async function reloadRuns() {
+    setPlannedRuns(await getAllPlannedRuns().catch(() => [] as PlannedRun[]));
+  }
+
+  /**
+   * Mark a planned run done and write a real RunEntry, so planned training
+   * flows into the same running history as everything else.
+   *
+   * Idempotent: a run that already produced a RunEntry is never logged twice,
+   * and the plan is flipped only after the entry is safely written.
+   */
+  async function handleCompleteRun(run: PlannedRun, actualKm: number) {
+    if (run.loggedRunId) return;            // already logged — don't double-count
+    const km = Math.round(actualKm * 100) / 100;
+    if (!isFinite(km) || km <= 0) throw new Error('invalid distance');
+
+    const entry: RunEntry = {
+      id: crypto.randomUUID(),
+      date: run.date,
+      distanceKm: km,
+      source: 'manual',
+    };
+    await saveRun(entry);
+    await savePlannedRun({
+      ...run,
+      status: 'done',
+      completedAt: Date.now(),
+      loggedRunId: entry.id,
+    });
+    await reloadRuns();
   }
 
   async function handleSave(plan: WorkoutPlan) {
@@ -389,7 +449,8 @@ export default function PlannerTab() {
       return next.sort((a, b) => (a.date ?? '').localeCompare(b.date ?? '') || b.createdAt - a.createdAt);
     });
     setEditing(undefined);
-    setView('list');
+    setBuilderDate(undefined);
+    setView(returnTo);
   }
 
   async function handleDelete(id: string) {
@@ -414,8 +475,8 @@ export default function PlannerTab() {
   function handleFinish(completed: WorkoutPlan) {
     setPlans(prev => prev.map(p => p.id === completed.id ? completed : p));
     setActiveWorkout(null);
-    setView('list');
-    setListTab('done');
+    setView(returnTo);
+    if (returnTo === 'list') setListTab('done');
   }
 
   const today = getTodayString();
@@ -428,7 +489,7 @@ export default function PlannerTab() {
       <ActiveWorkout
         plan={activeWorkout}
         onFinish={handleFinish}
-        onCancel={() => { setActiveWorkout(null); setView('list'); }}
+        onCancel={() => { setActiveWorkout(null); setView(returnTo); }}
       />
     );
   }
@@ -437,9 +498,61 @@ export default function PlannerTab() {
     return (
       <WorkoutBuilder
         initial={editing}
+        initialDate={builderDate}
         onSave={handleSave}
-        onCancel={() => { setEditing(undefined); setView('list'); }}
+        onCancel={() => { setEditing(undefined); setBuilderDate(undefined); setView(returnTo); }}
       />
+    );
+  }
+
+  if (view === 'schedule') {
+    return (
+      <div className="pt-1 space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Training Plan
+          </span>
+          <button
+            onClick={() => setView('list')}
+            className="text-cobalt-500 text-xs font-semibold hover:text-cobalt-400 transition-colors"
+          >
+            All workouts
+          </button>
+        </div>
+
+        <ScheduleView
+          anchorDate={anchorDate}
+          today={today}
+          plans={plans}
+          runs={plannedRuns}
+          onPrevWeek={() => setAnchorDate(d => addDaysLocal(weekStart(d), -7))}
+          onNextWeek={() => setAnchorDate(d => addDaysLocal(weekStart(d), 7))}
+          onThisWeek={() => setAnchorDate(today)}
+          onAddWorkout={(d) => { setEditing(undefined); setBuilderDate(d); setReturnTo('schedule'); setView('builder'); }}
+          onAddRun={(d) => { setEditingRun(null); setRunSheetDate(d); }}
+          onStartWorkout={(p) => { setActiveWorkout(p); setReturnTo('schedule'); setView('active'); }}
+          onEditRun={(r) => { setEditingRun(r); setRunSheetDate(r.date); }}
+          onCompleteRun={(r) => setLoggingRun(r)}
+        />
+
+        <RunPlanSheet
+          open={runSheetDate !== null}
+          onClose={() => { setRunSheetDate(null); setEditingRun(null); }}
+          date={runSheetDate ?? today}
+          existing={editingRun}
+          onSaved={reloadRuns}
+        />
+
+        <RunPlanSheet
+          open={loggingRun !== null}
+          onClose={() => setLoggingRun(null)}
+          date={loggingRun?.date ?? today}
+          existing={loggingRun}
+          mode="log"
+          onSaved={reloadRuns}
+          onLog={handleCompleteRun}
+        />
+      </div>
     );
   }
 
@@ -448,9 +561,14 @@ export default function PlannerTab() {
     <div className="pt-1 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Workout Planner</span>
         <button
-          onClick={() => { setEditing(undefined); setView('builder'); }}
+          onClick={() => setView('schedule')}
+          className="text-xs font-semibold text-cobalt-500 uppercase tracking-wider hover:text-cobalt-400 transition-colors"
+        >
+          ← Plan
+        </button>
+        <button
+          onClick={() => { setEditing(undefined); setBuilderDate(undefined); setReturnTo('list'); setView('builder'); }}
           className="text-cobalt-500 text-xs font-semibold flex items-center gap-1 hover:text-cobalt-400 transition-colors"
         >
           <Plus size={12} /> Plan Workout
@@ -509,8 +627,8 @@ export default function PlannerTab() {
             <PlanCard
               key={p.id}
               plan={p}
-              onStart={() => { setActiveWorkout(p); setView('active'); }}
-              onEdit={() => { setEditing(p); setView('builder'); }}
+              onStart={() => { setActiveWorkout(p); setReturnTo('list'); setView('active'); }}
+              onEdit={() => { setEditing(p); setBuilderDate(undefined); setReturnTo('list'); setView('builder'); }}
               onDuplicate={() => handleDuplicate(p)}
               onDelete={() => handleDelete(p.id)}
             />

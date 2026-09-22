@@ -161,7 +161,11 @@ export default function LogScreen() {
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
-  const [logTab, setLogTab] = useState<LogTab>('lifting');
+  const [logTab, setLogTab] = useState<LogTab>(() => {
+    // Deep link support, e.g. /?tab=planner from the Home plan card.
+    const t = new URLSearchParams(window.location.search).get('tab');
+    return (LOG_TAB_IDS as string[]).includes(t ?? '') ? (t as LogTab) : 'lifting';
+  });
   const [logTabOrder, setLogTabOrder] = useState<TabDef[]>(loadLogTabOrder);
   const [showSets, setShowSets] = useState(false);
   const [allRuns, setAllRuns] = useState<RunEntry[]>([]);

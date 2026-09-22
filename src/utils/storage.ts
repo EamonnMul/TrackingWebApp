@@ -8,7 +8,7 @@ import {
 } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, auth, storage } from '../firebase';
-import { DayWorkout, WorkoutSet, FidgetRecord, RunEntry, GratitudeEntry, Exercise, Habit, HabitEntry, HabitRewardGoal, WeightEntry, WeightGoal, WeightUnit, StravaConnection, Todo, FutureMeMessage, WorkoutPlan, WorkoutTemplate, PlannedExercise, Routine } from '../types';
+import { DayWorkout, WorkoutSet, FidgetRecord, RunEntry, PlannedRun, GratitudeEntry, Exercise, Habit, HabitEntry, HabitRewardGoal, WeightEntry, WeightGoal, WeightUnit, StravaConnection, Todo, FutureMeMessage, WorkoutPlan, WorkoutTemplate, PlannedExercise, Routine } from '../types';
 
 export const DEFAULT_EXERCISE_ID = 'default';
 export const DEFAULT_EXERCISE_NAME = 'Incline Dumbbell Press';
@@ -536,11 +536,29 @@ export async function getAllWorkoutPlans(): Promise<WorkoutPlan[]> {
 }
 
 export async function saveWorkoutPlan(plan: WorkoutPlan): Promise<void> {
-  await setDoc(userDoc('workoutPlans', plan.id), plan);
+  // Firestore rejects undefined; duplicate/undated plans carry undefined
+  // date and completedAt. Same strip as saveHabit.
+  await setDoc(userDoc('workoutPlans', plan.id), JSON.parse(JSON.stringify(plan)));
 }
 
 export async function deleteWorkoutPlan(id: string): Promise<void> {
   await deleteDoc(userDoc('workoutPlans', id));
+}
+
+// ─── Planned runs ─────────────────────────────────────────────────────────────
+
+export async function getAllPlannedRuns(): Promise<PlannedRun[]> {
+  const snap = await getDocs(userCol('plannedRuns'));
+  return snap.docs.map(d => d.data() as PlannedRun);
+}
+
+export async function savePlannedRun(run: PlannedRun): Promise<void> {
+  // Strip undefined — Firestore rejects it (same idiom as saveHabit).
+  await setDoc(userDoc('plannedRuns', run.id), JSON.parse(JSON.stringify(run)));
+}
+
+export async function deletePlannedRun(id: string): Promise<void> {
+  await deleteDoc(userDoc('plannedRuns', id));
 }
 
 // ─── Routines (scaffold) ──────────────────────────────────────────────────────

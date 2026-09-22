@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, Check, Zap, Trash2, ChevronDown, Sun, Repeat2, Lightbulb,
-  Flame, Footprints, Scale, Dumbbell, Beef, ChevronRight,
+  Flame, Footprints, Scale, Dumbbell, Beef, ChevronRight, CalendarCheck,
 } from 'lucide-react';
 import {
   getAllTodos, saveTodo, deleteTodo, getTodayString, formatDate,
@@ -10,12 +10,14 @@ import {
   getAllHabitEntriesForHabit,
   getAllRuns, getAllWeightEntries, getWeightGoal, getWeightUnit, kgToUnit,
   getAllExercises, getAllWorkoutsForExercise, DEFAULT_EXERCISE_ID,
+  getAllWorkoutPlans, getAllPlannedRuns,
 } from '../utils/storage';
 import { getNutritionEntry, getNutritionTarget } from '../utils/nutrition';
 import { sumFoodLogs, pctOfTarget, remaining } from '../utils/nutritionCalc';
 import {
   Todo, Habit, HabitEntry, HabitCompletion, RecurrenceRule,
   WeightEntry, WeightGoal, WeightUnit, NutritionEntry, NutritionTarget,
+  WorkoutPlan, PlannedRun,
 } from '../types';
 import {
   deriveStreakState,
@@ -89,6 +91,8 @@ interface Snapshot {
   setsWeek: number;
   nutritionEntry: NutritionEntry | null;
   nutritionTarget: NutritionTarget | null;
+  todayPlans: WorkoutPlan[];
+  todayRuns: PlannedRun[];
 }
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -162,6 +166,14 @@ export default function TodayScreen() {
           getNutritionEntry(today),
           getNutritionTarget(),
         ]);
+        // Own failure domain: a planner read failing must not blank the
+        // weight / running / lifting / nutrition snapshot.
+        const [allPlans, allPlannedRuns] = await Promise.all([
+          getAllWorkoutPlans().catch(() => [] as WorkoutPlan[]),
+          getAllPlannedRuns().catch(() => [] as PlannedRun[]),
+        ]);
+        const todayPlans = allPlans.filter(p => p.date === today && p.status === 'planned');
+        const todayRuns = allPlannedRuns.filter(r => r.date === today && r.status === 'planned');
         const exerciseIds = [DEFAULT_EXERCISE_ID, ...exercises.map(e => e.id).filter(id => id !== DEFAULT_EXERCISE_ID)];
         const workoutLists = await Promise.all(exerciseIds.map(id => getAllWorkoutsForExercise(id)));
         const setsWeek = workoutLists.flat()
@@ -174,11 +186,11 @@ export default function TodayScreen() {
           setSnapshot({
             weights: [...weights].sort((a, b) => a.date.localeCompare(b.date)),
             weightGoal, weightUnit, runKmWeek, setsWeek,
-            nutritionEntry, nutritionTarget,
+            nutritionEntry, nutritionTarget, todayPlans, todayRuns,
           });
         }
       } catch {
-        if (!cancelled) setSnapshot({ weights: [], weightGoal: null, weightUnit: 'kg', runKmWeek: 0, setsWeek: 0, nutritionEntry: null, nutritionTarget: null });
+        if (!cancelled) setSnapshot({ weights: [], weightGoal: null, weightUnit: 'kg', runKmWeek: 0, setsWeek: 0, nutritionEntry: null, nutritionTarget: null, todayPlans: [], todayRuns: [] });
       }
     })();
     return () => { cancelled = true; };
@@ -583,6 +595,40 @@ export default function TodayScreen() {
             value={String(snapshot.setsWeek)}
           />
         </div>
+      )}
+
+      {/* ── Today's training plan → Planner ─────────────────────────────────── */}
+      {snapshot && (snapshot.todayPlans.length > 0 || snapshot.todayRuns.length > 0) && (
+        <section>
+          <SectionLabel right={<ChevronRight size={14} className="text-slate-300 dark:text-slate-600" />}>
+            Planned today
+          </SectionLabel>
+          <button
+            onClick={() => navigate('/?tab=planner')}
+            className="card w-full p-4 text-left hover:border-cobalt-500/40 active:scale-[0.995] transition-all space-y-2"
+          >
+            {snapshot.todayPlans.map(p => (
+              <div key={p.id} className="flex items-center gap-2.5">
+                <Dumbbell size={13} className="text-cobalt-500 shrink-0" />
+                <span className="flex-1 min-w-0 text-sm font-semibold text-slate-900 dark:text-white truncate">
+                  {p.name}
+                </span>
+                <span className="text-[11px] text-slate-400 shrink-0">
+                  {p.exercises.length} exercise{p.exercises.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+            ))}
+            {snapshot.todayRuns.map(r => (
+              <div key={r.id} className="flex items-center gap-2.5">
+                <Footprints size={13} className="text-success-500 shrink-0" />
+                <span className="flex-1 min-w-0 text-sm font-semibold text-slate-900 dark:text-white truncate">
+                  <span className="tabular">{r.distanceKm}</span> km {r.runType} run
+                </span>
+                <CalendarCheck size={12} className="text-slate-300 dark:text-slate-600 shrink-0" />
+              </div>
+            ))}
+          </button>
+        </section>
       )}
 
       {/* ── Nutrition summary → Fuel ───────────────────────────────────────── */}
